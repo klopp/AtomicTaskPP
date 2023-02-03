@@ -13,11 +13,11 @@ use Parallel::ForkManager;
 use Sys::Info;
 
 use lib q{.};
-use Resource::File;
+use Resource::MemFile;
 
 # ------------------------------------------------------------------------------
 const my $CHILDREN => Sys::Info->new->device('CPU')->count - 1 || 2;
-const my $DATADIR  => '../data/';
+const my $DATADIR  => './data/';
 const my $DATAFILE => $DATADIR . '%u.dat';
 const my $LOCKFILE => $DATADIR . basename($PROGRAM_NAME) . q{.} . $PID . '.lock';
 const my $MUTEX    => Mutex->new( path => $LOCKFILE );
@@ -33,8 +33,8 @@ for ( 0 .. $CHILDREN ) {
     my ( $file1, $file2 ) = ( sprintf( $DATAFILE, $id1 ), sprintf( $DATAFILE, $id2 ) );
     touch $file1, $file2;
     Task->new(
-        [   Resource::File->new( { source => $file1, tempdir => $TEMPDIR, id => $id1, } ),
-            Resource::File->new( { source => $file2, tempdir => $TEMPDIR, id => $id2, } ),
+        [   Resource::MemFile->new( { source => $file1, tempdir => $TEMPDIR, id => $id1, } ),
+            Resource::MemFile->new( { source => $file2, tempdir => $TEMPDIR, id => $id2, } ),
         ],
         { mutex => $MUTEX, },
     )->run;
@@ -53,9 +53,9 @@ sub execute
 {
     my ($self) = @_;
     for ( @{ $self->{resources} } ) {
-        printf "Task ID: %s, resource ID: %s\n", $self->id, $_->id;
-        print { $_->{workh} } $_->id;
-        truncate $_->{workh}, length $_->id;
+        my $data = sprintf "Task ID: %s, resource ID: %s\n", $self->id, $_->id;
+        print $data;
+        $_->{work} = $data;
         $_->{modified} = 1;
     }
     return;

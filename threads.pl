@@ -14,7 +14,7 @@ use lib q{.};
 use Resource::MemFile;
 
 # ------------------------------------------------------------------------------
-const my $DATADIR  => '../data/';
+const my $DATADIR  => './data/';
 const my $DATAFILE => $DATADIR . '%u.dat';
 const my $MUTEX    => Mutex->new;
 const my $THREADS  => Sys::Info->new->device('CPU')->count - 1 || 2;
