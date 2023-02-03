@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use lib q{.};
 
-use atomic;
+use atomicPP;
 use Const::Fast;
 use English qw/-no_match_vars/;
 use File::Basename qw/basename/;
@@ -20,7 +20,7 @@ const my $THREADS => Sys::Info->new->device('CPU')->count - 1 || 2;
 
 # ------------------------------------------------------------------------------
 threads->create(
-    \&atomic::modify_file,
+    \&atomicPP::modify_file,
     {   id    => int( rand 100_000 ) + 1,
         mutex => $MUTEX,
         file  => $FILE
