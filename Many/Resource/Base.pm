@@ -37,8 +37,7 @@ sub is_modified
 sub _emethod
 {
     my ($self) = @_;
-    croak sprintf 'Method "$error = %s()" must be overloaded.', ( caller 1 )[3];
-    return $self;
+    return croak sprintf 'Method "$error = %s()" must be overloaded.', ( caller 1 )[3];
 }
 
 # ------------------------------------------------------------------------------

@@ -17,6 +17,18 @@ use base qw/Resource::Base/;
 # ------------------------------------------------------------------------------
 sub new
 {
+=for comment
+    В {params} ДОЛЖНО быть:
+        {source}
+    В {params} МОЖЕТ быть:
+        {tempdir}
+        {id}
+    Структура после полной инициализации:
+        {params}
+        {workh}  хэндл рабочего файла
+        {work}   имя рабочего файла
+        {bakup}  имя файла с копией исходного
+=cut    
     my ( $class, $params ) = @_;
     my $self = $class->SUPER::new($params);
     $self->{tempdir} = $params->{tempdir};
@@ -29,7 +41,7 @@ sub new
 sub check_params
 {
     my ($self) = @_;
-    croak 'No {source} in params.' unless $self->{params}->{source};
+    return sprintf 'No {source} in params.' unless $self->{params}->{source};
     return;
 }
 
