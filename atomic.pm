@@ -10,6 +10,18 @@ use Mutex;
 use Try::Tiny;
 
 # ------------------------------------------------------------------------------
+
+=for comment
+    Не создаём временный файл в системном $TEMP, так как он может
+    оказаться на другом разделе, и в этом случае
+    условно-атомарный вызов rename не сработает.
+    Другие варианты (File::Copy::move и т.д.) уж точно не атомарные.
+=cut
+
+my $TEMPDIR = $ENV{HOME} . '/tmp';
+$TEMPDIR = q{.} unless -d $TEMPDIR;
+
+# ------------------------------------------------------------------------------
 sub modify_file
 {
     my ( $tmph, $tmpfile, $param ) = ( undef, undef, @_ );
@@ -19,9 +31,10 @@ sub modify_file
 
 =for comment
     1) создаём копию исходного файла
+        (будет создан если не существует)
 =cut
 
-        ( $tmph, $tmpfile ) = tempfile DIR => q{.};
+        ( $tmph, $tmpfile ) = tempfile DIR => $TEMPDIR;
         copy( $param->{file}, $tmpfile );
 
 =for comment

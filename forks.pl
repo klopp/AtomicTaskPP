@@ -9,15 +9,26 @@ use atomic;
 use Const::Fast;
 use English qw/-no_match_vars/;
 use File::Basename qw/basename/;
+use File::Util::Tempdir qw/get_tempdir get_user_tempdir/;
 use Mutex;
 use Parallel::ForkManager;
 use Sys::Info;
+use Try::Tiny;
 
 # ------------------------------------------------------------------------------
 const my $CHILDREN => Sys::Info->new->device('CPU')->count - 1 || 2;
 const my $FILE     => './' . basename($PROGRAM_NAME) . '.dat';
-const my $LOCKFILE => '/tmp/' . basename($PROGRAM_NAME) . q{.} . $PID . '.lock';
-const my $MUTEX    => Mutex->new( path => $LOCKFILE );
+my $LOCKFILE;
+try {
+    $LOCKFILE = get_tempdir || get_user_tempdir;
+}
+catch {
+    $LOCKFILE = q{.};
+}
+finally {
+    $LOCKFILE .= q{/} . basename($PROGRAM_NAME) . q{.} . $PID . '.lock';
+};
+const my $MUTEX => Mutex->new( path => $LOCKFILE );
 
 # ------------------------------------------------------------------------------
 my $pm = Parallel::ForkManager->new($CHILDREN);
