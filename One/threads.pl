@@ -19,6 +19,7 @@ const my $MUTEX   => Mutex->new;
 const my $THREADS => Sys::Info->new->device('CPU')->count - 1 || 2;
 
 # ------------------------------------------------------------------------------
+srand;
 threads->create(
     \&atomicPP::modify_file,
     {   id    => int( rand 100_000 ) + 1,

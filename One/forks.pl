@@ -38,7 +38,6 @@ for ( 1 .. $CHILDREN ) {
     $pm->finish;
 }
 $pm->wait_all_children;
-unlink $LOCKFILE;
 
 # ------------------------------------------------------------------------------
 __END__
