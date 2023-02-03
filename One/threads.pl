@@ -14,7 +14,7 @@ use Sys::Info;
 use threads;
 
 # ------------------------------------------------------------------------------
-const my $FILE    => './' . basename($PROGRAM_NAME) . '.dat';
+const my $FILE    => '../Resources/' . basename($PROGRAM_NAME) . '.dat';
 const my $MUTEX   => Mutex->new;
 const my $THREADS => Sys::Info->new->device('CPU')->count - 1 || 2;
 

@@ -17,7 +17,7 @@ use Try::Tiny;
 
 # ------------------------------------------------------------------------------
 const my $CHILDREN => Sys::Info->new->device('CPU')->count - 1 || 2;
-const my $FILE     => './' . basename($PROGRAM_NAME) . '.dat';
+const my $FILE     => '../Resources/' . basename($PROGRAM_NAME) . '.dat';
 my $LOCKFILE;
 try {
     $LOCKFILE = get_tempdir || get_user_tempdir;
