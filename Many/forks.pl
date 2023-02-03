@@ -33,18 +33,20 @@ for ( 0 .. $CHILDREN ) {
     my ( $file1, $file2 ) = ( sprintf( $DATAFILE, $id1 ), sprintf( $DATAFILE, $id2 ) );
     touch $file1, $file2;
     Task->new(
-        [   Resource::File->new( { mutex => $MUTEX, source => $file1, tempdir => $TEMPDIR, id => $id1, } ),
-            Resource::File->new( { mutex => $MUTEX, source => $file2, tempdir => $TEMPDIR, id => $id2, } ),
-        ]
+        [   Resource::File->new( { source => $file1, tempdir => $TEMPDIR, id => $id1, } ),
+            Resource::File->new( { source => $file2, tempdir => $TEMPDIR, id => $id2, } ),
+        ],
+        { mutex => $MUTEX, },
     )->run;
     $pm->finish;
 }
 $pm->wait_all_children;
+unlink $LOCKFILE;
 
 # ------------------------------------------------------------------------------
 package Task;
-use AtomicTask;
-use parent qw/AtomicTask/;
+use AtomicTaskPP;
+use parent qw/AtomicTaskPP/;
 
 # ------------------------------------------------------------------------------
 sub execute

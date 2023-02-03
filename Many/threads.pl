@@ -30,9 +30,10 @@ for ( 1 .. $THREADS ) {
     touch $file1, $file2;
     push @tasks,
         Task->new(
-        [   Resource::File->new( { mutex => $MUTEX, source => $file1, tempdir => $TEMPDIR, id => $id1, } ),
-            Resource::File->new( { mutex => $MUTEX, source => $file2, tempdir => $TEMPDIR, id => $id2, } ),
-        ]
+        [   Resource::File->new( { source => $file1, tempdir => $TEMPDIR, id => $id1, }, ),
+            Resource::File->new( { source => $file2, tempdir => $TEMPDIR, id => $id2, }, ),
+        ],
+        { mutex => $MUTEX, },
         );
 }
 
@@ -41,8 +42,8 @@ $_->join for threads->list;
 
 # ------------------------------------------------------------------------------
 package Task;
-use AtomicTask;
-use parent qw/AtomicTask/;
+use AtomicTaskPP;
+use parent qw/AtomicTaskPP/;
 
 # ------------------------------------------------------------------------------
 sub execute

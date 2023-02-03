@@ -1,4 +1,4 @@
-package AtomicTask;
+package AtomicTaskPP;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;

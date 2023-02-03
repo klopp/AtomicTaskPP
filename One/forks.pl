@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use lib q{.};
 
-use AtomicTask;
+use AtomicTaskPP;
 use Const::Fast;
 use English qw/-no_match_vars/;
 use File::Basename qw/basename/;
@@ -36,10 +36,11 @@ touch $FILE;
 my $pm = Parallel::ForkManager->new($CHILDREN);
 for ( 1 .. $CHILDREN ) {
     my $pid = $pm->start and next;
-    AtomicTask::modify_file( { id => $PID, mutex => $MUTEX, file => $FILE } );
+    AtomicTaskPP::modify_file( { id => $PID, mutex => $MUTEX, file => $FILE } );
     $pm->finish;
 }
 $pm->wait_all_children;
+unlink $LOCKFILE;
 
 # ------------------------------------------------------------------------------
 __END__
