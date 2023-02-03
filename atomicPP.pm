@@ -43,7 +43,7 @@ sub modify_file
 
         my $content = read_text $tmpfile;
         say "<<\n$content";
-        $content = join '', map { ( ' ' x $_ ) . $param->{id} . "\n" } 0 .. int( rand 9 ) + 1;
+        $content = join "\n", map { $param->{id} } 0 .. int( rand 9 ) + 1;
         say ">>\n$content";
         print $tmph $content;
         truncate $tmph, length $content;
