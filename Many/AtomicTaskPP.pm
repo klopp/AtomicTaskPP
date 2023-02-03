@@ -9,24 +9,41 @@ use Carp;
 use lib q{.};
 use Resource::Base;
 
+our $VERSION = 'v1.0';
+
 # ------------------------------------------------------------------------------
 sub new
 {
+
+=for comment
+    В {params} МОЖЕТ быть:
+        {mutex}
+        {commit_lock} лочить только коммит
+        {quiet}       не выводить предупреждения
+        {id}
+    Структура после полной инициализации:
+        {resources}
+        {params}
+        {id}
+=cut    
+
     my ( $class, $resources, $params ) = @_;
 
     $params //= {};
     croak 'Invalid {resources} value' unless ref $resources eq 'ARRAY';
     croak 'Invalid {params} value'    unless ref $params eq 'HASH';
+    croak 'Invalid {resources} value' if ref $resources ne 'ARRAY' || !@{$resources};
 
     srand;
     $params->{id} = int( rand 100_000 ) unless $params->{id};
 
     if ( $params->{mutex} ) {
-        croak '{mutex} can not lock!'   unless $params->{mutex}->can('lock');
-        croak '{mutex} can not unlock!' unless $params->{mutex}->can('unlock');
+        croak '{mutex} can not lock()!'   unless $params->{mutex}->can('lock');
+        croak '{mutex} can not unlock()!' unless $params->{mutex}->can('unlock');
     }
     else {
-        carp 'Warning: no {mutex} in parameters list, multi-threaded code may not be safe!';
+        carp 'Warning: no {mutex} in parameters list, multi-threaded code may not be safe!'
+            unless $params->{quiet};
     }
 
     my %self = (
@@ -85,7 +102,7 @@ sub run
             return croak sprintf "Error creating work copy: %s\n", $error;
         }
     }
-    $self->{params}->{mutex}->lock if $self->{params}->{mutex};
+    $self->{params}->{mutex}->lock if $self->{params}->{mutex} && !$self->{params}->{commit_lock};
 
 =for comment
     Модифицируем реурсы
@@ -98,7 +115,7 @@ sub run
 =cut
 
     if ($error) {
-        $self->{params}->{mutex}->unlock if $self->{params}->{mutex};
+        $self->{params}->{mutex}->unlock if $self->{params}->{mutex} && !$self->{params}->{commit_lock};
         $self->_delete_backups;
         $self->_delete_works;
         return croak sprintf "Error executing task: %s\n", $error;
@@ -108,6 +125,7 @@ sub run
     Меняем оригинальные ресурсы на модифицированные
 =cut
 
+    $self->{params}->{mutex}->unlock if $self->{params}->{mutex} && $self->{params}->{commit_lock};
     for ( my $i = 0; $i < @{ $self->{resources} }; ++$i ) {
         my $rs = $self->{resources}->[$i];
         if ( $rs->is_modified ) {

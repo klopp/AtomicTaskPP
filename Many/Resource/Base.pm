@@ -6,6 +6,8 @@ use warnings;
 
 use Carp;
 
+our $VERSION = 'v1.0';
+
 # ------------------------------------------------------------------------------
 sub new
 {
@@ -17,6 +19,7 @@ sub new
     * замену ресурса на резервную копию при неудаче предыдущего пункта
 =cut
     my ( $class, $params ) = @_;
+    $params //= {};
     croak 'Invalid {params} value.' unless ref $params eq 'HASH';
     $params->{id} = int(rand 100_000) unless $params->{id};
     my %self = ( modified => 0, params => $params );

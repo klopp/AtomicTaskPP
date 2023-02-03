@@ -5,14 +5,14 @@ use strict;
 use warnings;
 
 use Carp;
-use English qw/-no_match_vars/;
-use File::Copy qw/copy/;
 use File::Slurper qw/read_text read_binary write_text write_binary/;
 use Try::Tiny;
 
 use lib q{..};
 use Resource::Base;
 use base qw/Resource::Base/;
+
+our $VERSION = 'v1.0';
 
 # ------------------------------------------------------------------------------
 sub new
@@ -28,8 +28,9 @@ sub new
         {crlf}     интерпретация crlf (см. File::Slurper)
     Структура после полной инициализации:
         {params}
-        {work}   буфер с рабочим файлом
-        {backup} буфер с копией исходного файла
+        {modified} 
+        {work}      буфер с рабочим файлом
+        {backup}    буфер с копией исходного файла
 =cut    
 
     my ( $class, $params ) = @_;
@@ -104,9 +105,6 @@ sub delete_work_copy
 sub commit
 {
     my ($self) = @_;
-    
-    printf '[[%s]] <<%s>>', $self->{params}->{source}, $self->{work};
-    
     try {
         if ( $self->{params}->{textmode} ) {
             write_text( $self->{params}->{source}, $self->{work}, $self->{params}->{encoding},

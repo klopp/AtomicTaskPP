@@ -14,6 +14,8 @@ use lib q{..};
 use Resource::Base;
 use base qw/Resource::Base/;
 
+our $VERSION = 'v1.0';
+
 # ------------------------------------------------------------------------------
 sub new
 {
@@ -25,9 +27,10 @@ sub new
         {id}
     Структура после полной инициализации:
         {params}
-        {workh}  хэндл рабочего файла
-        {work}   имя рабочего файла
-        {bakup}  имя файла с копией исходного
+        {modified}
+        {workh}    хэндл рабочего файла
+        {work}     имя рабочего файла
+        {bakup}    имя файла с копией исходного
 =cut    
     my ( $class, $params ) = @_;
     my $self = $class->SUPER::new($params);
