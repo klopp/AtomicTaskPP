@@ -1,11 +1,11 @@
 package AtomicTaskPP;
 
 # ------------------------------------------------------------------------------
-use strict;
-use warnings;
+use Modern::Perl;
 
-use Carp;
-
+use Carp qw/cluck croak/;
+use Clone qw/clone/;
+use DDP;
 use lib q{.};
 use Resource::Base;
 
@@ -16,6 +16,8 @@ sub new
 {
 
 =for comment
+    На входе ДОЛЖНО быть:
+        {resources} [ Resource::*, ...] 
     В {params} МОЖЕТ быть:
         {mutex}
         {commit_lock} лочить только коммит
@@ -30,28 +32,28 @@ sub new
     my ( $class, $resources, $params ) = @_;
 
     $params //= {};
-    croak 'Invalid {resources} value' unless ref $resources eq 'ARRAY';
-    croak 'Invalid {params} value'    unless ref $params eq 'HASH';
+    croak 'Invalid {params} value' unless ref $params eq 'HASH';
     croak 'Invalid {resources} value' if ref $resources ne 'ARRAY' || !@{$resources};
 
     srand;
     $params->{id} = int( rand 100_000 ) unless $params->{id};
 
     if ( $params->{mutex} ) {
-        croak '{mutex} can not lock()!'   unless $params->{mutex}->can('lock');
-        croak '{mutex} can not unlock()!' unless $params->{mutex}->can('unlock');
+        $params->{mutex}->can('lock')   or croak '{mutex} can not lock()!';
+        $params->{mutex}->can('unlock') or croak '{mutex} can not unlock()!';
     }
     else {
-        carp 'Warning: no {mutex} in parameters list, multi-threaded code may not be safe!'
-            unless $params->{quiet};
+        $params->{quiet}
+            or cluck 'Warning: no {mutex} in parameters list, multi-threaded code may not be safe!';
     }
 
-    my %self = (
+    my %data = (
         resources => $resources,
         params    => $params,
     );
 
-    return bless \%self, $class;
+    my $self = bless \%data, $class;
+    return $self;
 }
 
 # ------------------------------------------------------------------------------
@@ -65,6 +67,7 @@ sub id
 sub run
 {
     my ( $error, $self ) = ( undef, @_ );
+
     for ( my $i = 0; $i < @{ $self->{resources} }; ++$i ) {
         my $rs = $self->{resources}->[$i];
 
@@ -128,7 +131,7 @@ sub run
     $self->{params}->{mutex}->unlock if $self->{params}->{mutex} && $self->{params}->{commit_lock};
     for ( my $i = 0; $i < @{ $self->{resources} }; ++$i ) {
         my $rs = $self->{resources}->[$i];
-        if ( $rs->is_modified ) {
+        if ( $rs->modified ) {
             $error = $rs->commit;
 
 =for comment
@@ -168,10 +171,10 @@ sub execute
 sub _rollback
 {
     my ( $self, $i ) = @_;
-    return unless @{ $self->{resources} };
+    @{ $self->{resources} } or return;
     $i //= @{ $self->{resources} } - 1;
     for ( 0 .. $i ) {
-        $self->{resources}->[$_]->rollback if $self->{resources}->[$_]->is_modified;
+        $self->{resources}->[$_]->rollback if $self->{resources}->[$_]->modified;
     }
     return $i;
 }
@@ -180,7 +183,7 @@ sub _rollback
 sub _delete_backups
 {
     my ( $self, $i ) = @_;
-    return unless @{ $self->{resources} };
+    @{ $self->{resources} } or return;
     $i //= @{ $self->{resources} } - 1;
     for ( 0 .. $i ) {
         $self->{resources}->[$_]->delete_backup_copy;
@@ -192,7 +195,7 @@ sub _delete_backups
 sub _delete_works
 {
     my ( $self, $i ) = @_;
-    return unless @{ $self->{resources} };
+    @{ $self->{resources} } or return;
     $i //= @{ $self->{resources} } - 1;
     for ( 0 .. $i ) {
         $self->{resources}->[$_]->delete_work_copy;

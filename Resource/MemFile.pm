@@ -1,8 +1,7 @@
 package Resource::MemFile;
 
 # ------------------------------------------------------------------------------
-use strict;
-use warnings;
+use Modern::Perl;
 
 use Carp;
 use File::Slurper qw/read_text read_binary write_text write_binary/;
@@ -40,8 +39,6 @@ sub new
 # ------------------------------------------------------------------------------
 sub check_params
 {
-    my ($self) = @_;
-    return sprintf 'No {source} in params.' unless $self->{params}->{source};
     return;
 }
 
@@ -69,7 +66,7 @@ sub create_backup_copy
 sub delete_backup_copy
 {
     my ($self) = @_;
-    undef $self->{backup};
+    delete $self->{backup};
     return;
 }
 
@@ -97,7 +94,7 @@ sub create_work_copy
 sub delete_work_copy
 {
     my ($self) = @_;
-    undef $self->{work};
+    delete $self->{work};
     return;
 }
 
@@ -113,7 +110,7 @@ sub commit
         else {
             write_binary( $self->{params}->{source}, $self->{work} );
         }
-        undef $self->{work};
+        delete $self->{work};
     }
     catch {
         return sprintf 'can not overwrite source file "%s" (%s)', $self->{params}->{source}, $_;
@@ -138,7 +135,7 @@ sub rollback
         else {
             write_binary( $self->{params}->{source}, $self->{backup} );
         }
-        undef $self->{backup};
+        delete $self->{backup};
     }
     catch {
         return sprintf 'can not overwrite source file "%s" (%s)', $self->{params}->{source}, $_;

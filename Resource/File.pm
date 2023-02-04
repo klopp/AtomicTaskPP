@@ -19,6 +19,7 @@ our $VERSION = 'v1.0';
 # ------------------------------------------------------------------------------
 sub new
 {
+
 =for comment
     В {params} ДОЛЖНО быть:
         {source}
@@ -32,19 +33,18 @@ sub new
         {work}     имя рабочего файла
         {bakup}    имя файла с копией исходного
 =cut    
+
     my ( $class, $params ) = @_;
     my $self = $class->SUPER::new($params);
     $self->{tempdir} = $params->{tempdir};
-    $self->{tempdir} = $ENV{HOME} . '/tmp' unless $self->{tempdir};
-    $self->{tempdir} = q{.}                unless -d $self->{tempdir};
+    $self->{tempdir}    or $self->{tempdir} = $ENV{HOME} . '/tmp';
+    -d $self->{tempdir} or $self->{tempdir} = q{.};
     return $self;
 }
 
 # ------------------------------------------------------------------------------
 sub check_params
 {
-    my ($self) = @_;
-    return sprintf 'No {source} in params.' unless $self->{params}->{source};
     return;
 }
 
@@ -72,8 +72,8 @@ sub create_backup_copy
 sub delete_backup_copy
 {
     my ($self) = @_;
-    unlink $self->{backup} if $self->{backup};
-    undef $self->{backup};
+    $self->{backup} and unlink $self->{backup};
+    delete $self->{backup};
     return;
 }
 
@@ -102,10 +102,10 @@ sub create_work_copy
 sub delete_work_copy
 {
     my ($self) = @_;
-    close $self->{workh} if $self->{workh};
-    unlink $self->{work} if $self->{work};
-    undef $self->{workh};
-    undef $self->{work};
+    $self->{workh} and close $self->{workh};
+    $self->{work}  and unlink $self->{work};
+    delete $self->{workh};
+    delete $self->{work};
     return;
 }
 
@@ -114,12 +114,12 @@ sub commit
 {
     my ($self) = @_;
     close $self->{workh};
-    undef $self->{workh};
+    delete $self->{workh};
     if ( $self->{work} ) {
         unless ( rename $self->{work}, $self->{params}->{source} ) {
             return sprintf 'can not rename "%s" to "%s": %s', $self->{work}, $self->{params}->{source}, $ERRNO;
         }
-        undef $self->{work};
+        delete $self->{work};
     }
     return;
 }
@@ -130,10 +130,9 @@ sub rollback
     my ($self) = @_;
     if ( $self->{backup} ) {
         unless ( rename $self->{backup}, $self->{params}->{source} ) {
-            return sprintf 'can not rename "%s" to "%s": %s', $self->{backup}, $self->{params}->{source},
-                $ERRNO;
+            return sprintf 'can not rename "%s" to "%s": %s', $self->{backup}, $self->{params}->{source}, $ERRNO;
         }
-        undef $self->{params}->{backup};
+        delete $self->{backup};
     }
     return;
 }
