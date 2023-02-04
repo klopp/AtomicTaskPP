@@ -3,7 +3,7 @@ package Resource::Data;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use Clone qw/clone/;
+use Data::Clone qw/clone/;
 
 use lib q{..};
 use Resource::Base;
@@ -21,6 +21,7 @@ sub new
     В {params} МОЖЕТ быть:
         {id}
     Структура после полной инициализации:
+        {id}
         {params}
         {modified} 
         {work}      рабочие данные
