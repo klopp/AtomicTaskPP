@@ -4,12 +4,14 @@ package Resource::Base;
 use Modern::Perl;
 
 use Carp qw/confess/;
+use Time::HiRes qw/gettimeofday/;
 
 our $VERSION = 'v1.0';
 
 # ------------------------------------------------------------------------------
 sub new
 {
+
 =for comment
     Базовый класс для работы с ресурсами. Обеспечивает:
     * создание резервной копии ресурса для отката изменений
@@ -24,6 +26,7 @@ sub new
     В {params} МОЖЕТ быть:
         {id}
     Структура после полной инициализации:
+        {id}
         {params}
         {modified} 
         {work}      рабочие данные
@@ -34,13 +37,18 @@ sub new
     $params //= {};
     ref $params eq 'HASH' or confess 'Error: invalid {params} value.';
     $params->{source}     or confess 'Error: no {source} in {params}.';
-    $params->{id}         or $params->{id} = int( rand 100_000 );
 
-    my $self = bless {
+    my %data = (
         params   => $params,
         modified => 0,
-        },
-        $class;
+        backup   => undef,
+        work     => undef,
+        id       => $params->{id},
+    );
+    unless ( $data{id} ) {
+        $data{id} = join q{.}, (gettimeofday());
+    }
+    my $self  = bless \%data, $class;
     my $error = $self->check_params;
     $error and confess sprintf 'Error: invalid parameters: %s', $error;
     return $self;
@@ -50,7 +58,7 @@ sub new
 sub id
 {
     my ($self) = @_;
-    return $self->{params}->{id};
+    return $self->{id};
 }
 
 # ------------------------------------------------------------------------------

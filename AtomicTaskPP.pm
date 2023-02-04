@@ -6,6 +6,7 @@ use Modern::Perl;
 use Carp qw/cluck confess/;
 use Clone qw/clone/;
 use List::Util qw/first/;
+use Time::HiRes qw/gettimeofday/;
 
 use lib q{.};
 use Resource::Base;
@@ -18,10 +19,10 @@ our $VERSION = 'v1.0';
     Базовый класс, реализующий псевдо-атомарную задачу. На входе принимает массив
     потенциально изменяемых ресурсов, см. соответствующие классы Resource::*.
     * Создаёт резервные копии ресурсов для отката изменений (rollback)
-    * Создаёт рабочии копии ресурсов
+    * Создаёт рабочие копии ресурсов
     * Вызывает перегруженный метод execute()
-    * Заменяет ресурсы изменё1нными рабочими копиями если ошибок не случилось
-    * В случае ошибок на любом этапе откатывает заьронутые ресурсы на 
+    * Заменяет ресурсы изменёнными рабочими копиями если ошибок не случилось
+    * В случае ошибок на любом этапе откатывает затронутые ресурсы на 
         резервные копии
     
     Схема использования:
@@ -82,11 +83,8 @@ sub new
     my ( $class, $resources, $params ) = @_;
 
     $params //= {};
-    confess 'Error: invalid {params} value' unless ref $params eq 'HASH';
-    confess 'Error: invalid {resources} value' if ref $resources ne 'ARRAY' || !@{$resources};
-
-    srand;
-    $params->{id} = int( rand 100_000 ) unless $params->{id};
+    ref $params eq 'HASH'                           or confess 'Error: invalid {params} value';
+    ( ref $resources eq 'ARRAY' && @{$resources} ) or confess 'Error: invalid {resources} value';
 
     if ( $params->{mutex} ) {
         $params->{mutex}->can('lock')   or confess 'Error: {mutex} can not lock()!';
@@ -94,13 +92,18 @@ sub new
     }
     else {
         $params->{quiet}
-            or cluck 'Warning: no {mutex} in parameters list, multi-threaded code may not be safe!';
+            or cluck 'Warning: no {mutex} in {params}, multi-threaded code may not be safe!';
     }
 
     my %data = (
         resources => $resources,
         params    => $params,
+        id        => $params->{id},
     );
+
+    unless ( $data{id} ) {
+        $data{id} = join q{.}, (gettimeofday());
+    }
 
     my $self = bless \%data, $class;
     return $self;
@@ -110,7 +113,7 @@ sub new
 sub id
 {
     my ($self) = @_;
-    return $self->{params}->{id};
+    return $self->{id};
 }
 
 # ------------------------------------------------------------------------------
