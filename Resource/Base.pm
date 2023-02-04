@@ -30,8 +30,8 @@ sub new
 
     my ( $class, $params ) = @_;
     $params //= {};
-    ref $params eq 'HASH' or confess 'Invalid {params} value.';
-    $params->{source}     or confess 'No {source} in {params}.';
+    ref $params eq 'HASH' or confess 'Error: invalid {params} value.';
+    $params->{source}     or confess 'Error: no {source} in {params}.';
     $params->{id}         or $params->{id} = int( rand 100_000 );
 
     my $self = bless {
@@ -40,7 +40,7 @@ sub new
         },
         $class;
     my $error = $self->check_params;
-    $error and confess sprintf 'Invalid parameters: %s', $error;
+    $error and confess sprintf 'Error: invalid parameters: %s', $error;
     return $self;
 }
 
@@ -62,7 +62,7 @@ sub modified
 sub _emethod
 {
     my ($self) = @_;
-    return confess sprintf 'Method "$error = %s()" must be overloaded.', ( caller 1 )[3];
+    return confess sprintf 'Error: method "$error = %s()" must be overloaded.', ( caller 1 )[3];
 }
 
 # ------------------------------------------------------------------------------

@@ -32,15 +32,15 @@ sub new
     my ( $class, $resources, $params ) = @_;
 
     $params //= {};
-    confess 'Invalid {params} value' unless ref $params eq 'HASH';
-    confess 'Invalid {resources} value' if ref $resources ne 'ARRAY' || !@{$resources};
+    confess 'Error: invalid {params} value' unless ref $params eq 'HASH';
+    confess 'Error: invalid {resources} value' if ref $resources ne 'ARRAY' || !@{$resources};
 
     srand;
     $params->{id} = int( rand 100_000 ) unless $params->{id};
 
     if ( $params->{mutex} ) {
-        $params->{mutex}->can('lock')   or confess '{mutex} can not lock()!';
-        $params->{mutex}->can('unlock') or confess '{mutex} can not unlock()!';
+        $params->{mutex}->can('lock')   or confess 'Error: {mutex} can not lock()!';
+        $params->{mutex}->can('unlock') or confess 'Error: {mutex} can not unlock()!';
     }
     else {
         $params->{quiet}
@@ -163,7 +163,7 @@ sub execute
 =cut
 
     my ($self) = @_;
-    return confess sprintf 'Method "$error = %s()" must be overloaded', ( caller 0 )[3];
+    return confess sprintf 'Error: method "$error = %s()" must be overloaded', ( caller 0 )[3];
 }
 
 # ------------------------------------------------------------------------------
