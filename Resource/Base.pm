@@ -45,9 +45,8 @@ sub new
         work     => undef,
         id       => $params->{id},
     );
-    unless ( $data{id} ) {
-        $data{id} = join q{.}, (gettimeofday());
-    }
+    $data{id} or $data{id} = join q{.}, ( gettimeofday() );
+
     my $self  = bless \%data, $class;
     my $error = $self->check_params;
     $error and confess sprintf 'Error: invalid parameters: %s', $error;
