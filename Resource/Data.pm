@@ -33,10 +33,11 @@ sub new
 
     my ( $class, $params ) = @_;
 #    ${$params->{source}} = 'ggg';
-    $params->{backup} = ${$params->{source}};
-    tie $params->{source}, 'Resource::DataScalar', \$params->{backup};
+#    $params->{backup} = ${$params->{source}};
+#    tie ${$params->{source}}, 'Resource::DataScalar', $params->{backup};
     
     my $self = $class->SUPER::new($params);
+    $self->{backup} = ${$params->{source}};
 #    print DDump($params->{source});
 #    print "\n\n";
 #    print DDump($self->{params}->{source});
@@ -62,7 +63,7 @@ sub check_params
 sub create_backup_copy
 {
     my ($self) = @_;
-####    $self->{backup} = clone( $self->{source} );
+    $self->{backup} = clone(${$self->{params}->{source}});
     return;
 }
 
@@ -78,8 +79,7 @@ sub delete_backup_copy
 sub create_work_copy
 {
     my ($self) = @_;
-    $self->{work} = '$self->{work}';
-####    $self->{work} = clone( $self->{source} );
+    $self->{work} = clone(${$self->{params}->{source}});
     return;
 }
 
@@ -106,8 +106,8 @@ sub commit
 #    $self->{params}->{source} = clone($self->{work});
 #    $self->{params}->{source} = [8,8,8]; #clone($self->{work});
 #p ${$self->{params}->{source}};
-    ${$self->{params}->{source}} = 'eee';
-#p ${$self->{params}->{source}};
+#    ${$self->{params}->{source}} = $self->{work};
+    ${$self->{params}->{source}} = clone($self->{work});
 #    printf "res\n%s", np $self->{params}->{source};
     return;
 }
@@ -116,27 +116,27 @@ sub commit
 sub rollback
 {
     my ($self) = @_;
-    $self->{params}->{source} = clone( $self->{backup} );
+    ${$self->{params}->{source}} = $self->{backup};
     return;
 }
 
 # ------------------------------------------------------------------------------
 package Resource::DataScalar;
-=for comment
-use Tie::Scalar;
-use parent qw/Tie::Scalar/;
-
-sub new
-{
-    my ($class, @data) = @_;
-    use DDP;
-    p @data;
-    return bless {}, $class;
+sub TIESCALAR 
+{ 
+    my ( $class, $data ) = @_;
+    bless \$data, $class; 
 }
-=cut
-sub TIESCALAR { bless \my $self, shift }
-sub STORE { ${ $_[0] } = $_[1] }  # do the default thing
-sub FETCH { ${ my $self = shift } } # round value
+
+sub STORE 
+{ 
+    ${ $_[0] } = $_[1] 
+}
+
+sub FETCH 
+{ 
+    ${ my $self = shift } 
+}
 
 # ------------------------------------------------------------------------------
 1;

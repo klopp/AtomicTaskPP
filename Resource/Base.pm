@@ -35,7 +35,7 @@ sub new
 =cut
 
     my $self = bless {
-        params => dclone($params),
+        params => $params,
 
         #params   => $params,
         modified => 0,
