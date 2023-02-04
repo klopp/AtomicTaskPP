@@ -76,7 +76,7 @@ sub delete_work_copy
 sub commit
 {
     my ($self) = @_;
-    ${ $self->{params}->{source} } = clone( $self->{work} );
+    $self->{work} and ${ $self->{params}->{source} } = clone( $self->{work} );
     return;
 }
 
@@ -84,7 +84,7 @@ sub commit
 sub rollback
 {
     my ($self) = @_;
-    ${ $self->{params}->{source} } = clone( $self->{backup} );
+    $self->{backup} and ${ $self->{params}->{source} } = clone( $self->{backup} );
     return;
 }
 
