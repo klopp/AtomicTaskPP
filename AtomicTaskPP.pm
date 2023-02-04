@@ -5,7 +5,7 @@ use Modern::Perl;
 
 use Carp qw/cluck confess/;
 use Clone qw/clone/;
-use DDP;
+
 use lib q{.};
 use Resource::Base;
 
