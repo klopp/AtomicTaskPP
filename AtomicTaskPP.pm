@@ -29,14 +29,14 @@ our $VERSION = 'v1.0';
     
         # Файл отмапленный в память:
         use Resource::MemFile;
-        my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile' } );
+        my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile', } );
 
         # Сложная структура данных:
         use Resource::Data;
         my $data = { ... };
-        my $rd = Resource::Data->new ( { source => \$data, id => 'data' } );
+        my $rd = Resource::Data->new( { source => \$data, id => 'data' }, );
          
-        my $task = MyTask->new( [ $rfm, $rd ], { mutex => Mutex->new } );
+        my $task = MyTask->new( [ $rfm, $rd ], { mutex => Mutex->new }, );
         $task->run;
         exit;
 
