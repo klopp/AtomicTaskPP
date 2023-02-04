@@ -21,7 +21,7 @@ sub new
 
 =for comment
     В {params} ДОЛЖНО быть:
-        {source}
+        {source} имя исходного файла
     В {params} МОЖЕТ быть:
         {tempdir}
         {id}
