@@ -7,8 +7,6 @@ use Carp qw/cluck confess/;
 use Clone qw/clone/;
 use List::Util qw/first/;
 
-use DDP;
-
 use lib q{.};
 use Resource::Base;
 
