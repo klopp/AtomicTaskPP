@@ -3,7 +3,7 @@ package Resource::Data;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use Clone qw/clone/;
+use Data::Clone qw/clone/;
 
 use lib q{..};
 use Resource::Base;
@@ -17,10 +17,13 @@ sub new
 
 =for comment
     В {params} ДОЛЖНО быть:
-        {source}
+        {source} ссылка на скаляр, массив или хэш любой степени 
+                    вложенности 
+                    может быть blessed, желательно с методом clone()
     В {params} МОЖЕТ быть:
         {id}
     Структура после полной инициализации:
+        {id}
         {params}
         {modified} 
         {work}      рабочие данные
@@ -28,15 +31,20 @@ sub new
 =cut    
 
     my ( $class, $params ) = @_;
-    my $self = $class->SUPER::new($params);
-    return $self;
+    return $class->SUPER::new($params);
 }
 
 # ------------------------------------------------------------------------------
 sub check_params
 {
     my ($self) = @_;
-    ref $self->{params}->{source} eq 'REF' or return '{params}->{source} is not REF';
+
+    if (   ref $self->{params}->{source} ne 'REF'
+        && ref $self->{params}->{source} ne 'SCALAR' )
+    {
+
+        return 'ref {params}->{source} is not REF or SCALAR';
+    }
     return;
 }
 

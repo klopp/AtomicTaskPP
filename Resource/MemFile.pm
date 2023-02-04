@@ -19,11 +19,12 @@ sub new
 
 =for comment
     В {params} ДОЛЖНО быть:
-        {source}
+        {source} имя исходного файла
     В {params} МОЖЕТ быть:
         {id}
         {encoding} кодировка 
     Структура после полной инициализации:
+        {id}
         {params}
         {modified} 
         {work}      буфер с рабочим файлом
