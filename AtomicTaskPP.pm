@@ -4,8 +4,6 @@ package AtomicTaskPP;
 use Modern::Perl;
 
 use Carp qw/cluck confess/;
-use Clone qw/clone/;
-use List::Util qw/first/;
 use Time::HiRes qw/gettimeofday/;
 
 use lib q{.};
@@ -101,6 +99,7 @@ sub new
         id        => $params->{id},
     );
     $data{id} or $data{id} = join q{.}, ( gettimeofday() );
+    %{ $data{_hresources} } = map { $_->id => $_ } @{ $data{resources} };
 
     my $self = bless \%data, $class;
     return $self;
@@ -117,10 +116,7 @@ sub id
 sub getr
 {
     my ( $self, $id ) = @_;
-    return first {
-        $_->id eq $id;
-    }
-    @{ $self->{resources} };
+    return $self->{_hresources}->{$id};
 }
 
 # ------------------------------------------------------------------------------
@@ -142,8 +138,6 @@ sub run
 =cut
 
         if ($error) {
-
-            #            $self->_delete_backups($i);
             $i and $self->_delete_works( $i - 1 );
             return confess sprintf "Error creating work copy: %s\n", $error;
         }
@@ -162,8 +156,6 @@ sub run
 
     if ($error) {
         $self->{params}->{mutex}->unlock if $self->{params}->{mutex} && !$self->{params}->{commit_lock};
-
-        #        $self->_delete_backups;
         $self->_delete_works;
         return confess sprintf "Error executing task: %s\n", $error;
     }
@@ -172,7 +164,7 @@ sub run
     Меняем оригинальные ресурсы на модифицированные
 =cut
 
-    $self->{params}->{mutex}->unlock if $self->{params}->{mutex} && $self->{params}->{commit_lock};
+    $self->{params}->{mutex}->lock if $self->{params}->{mutex} && $self->{params}->{commit_lock};
     for ( my $i = 0; $i < @{ $self->{resources} }; ++$i ) {
         my $rs = $self->{resources}->[$i];
         if ( $rs->modified ) {
