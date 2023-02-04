@@ -28,9 +28,8 @@ sub new
     Структура после полной инициализации:
         {params}
         {modified}
-        {workh}    хэндл рабочего файла
-        {work}     имя рабочего файла
-        {bakup}    имя файла с копией исходного
+        {work}     рабочий файл (Path::Tiny)
+        {bakup}    резервная копия исходного файла (Path::Tiny)
 =cut    
 
     my ( $class, $params ) = @_;
@@ -78,7 +77,6 @@ sub create_work_copy
 
     try {
         $self->{work}  = Path::Tiny->tempfile( DIR => $self->{tempdir} );
-        $self->{workh} = $self->{work}->filehandle;
         path( $self->{params}->{source} )->copy( $self->{work} );
     }
     catch {
@@ -92,10 +90,8 @@ sub delete_work_copy
 {
     my ($self) = @_;
     if ( $self->{work} ) {
-        $self->{workh} and close $self->{workh};
         path( $self->{work} )->remove;
     }
-    delete $self->{workh};
     delete $self->{work};
     return;
 }
@@ -105,8 +101,6 @@ sub commit
 {
     my ($self) = @_;
     if ( $self->{work} ) {
-        $self->{workh} and close $self->{workh};
-        delete $self->{workh};
         try {
             $self->{work}->move( $self->{params}->{source} );
         }
