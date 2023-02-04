@@ -3,8 +3,8 @@ package Resource::XML;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use XML::Hash::XS;
 use Try::Tiny;
+use XML::Hash::XS;
 
 use lib q{..};
 use Resource::Data;

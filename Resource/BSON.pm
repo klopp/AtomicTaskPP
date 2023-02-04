@@ -3,7 +3,7 @@ package Resource::BSON;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use JSON::XS;
+use BSON;
 use Try::Tiny;
 
 use lib q{..};
