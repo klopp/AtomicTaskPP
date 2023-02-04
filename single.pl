@@ -21,7 +21,8 @@ use Resource::Data;
 #exit;
 # ------------------------------------------------------------------------------
 #my $data1 = '1';
-my $data1 = [1,2,3];
+my $data1 = { a => 2, b => [ 1,2,3, {c => { d => 9 } } ] };
+say np $data1;
 my $rd = Resource::Data->new( { source => \$data1, }, );
 =for comment
 $rd->create_backup_copy;
@@ -34,7 +35,7 @@ p $data1;
 =cut
 my $dt = Task->new( [$rd], { quiet => 1, }, );
 $dt->run;
-p $data1;
+say np $data1;
 
 # ------------------------------------------------------------------------------
 package Task;
@@ -47,35 +48,10 @@ sub execute
     my ($self) = @_;
     for my $rs ( @{ $self->{resources} } ) {
 
-        $rs->{work} = [4,5,6];
+        $rs->{work}->{b}->[3] = [4,5,6];
         $rs->{modified} = 1;
     }
     return;
-}
-
-# ------------------------------------------------------------------------------
-package DataScalar;
-use Scalar::Util qw/reftype/;
-use DDP;
-sub TIESCALAR 
-{ 
-    my ( $class, $data ) = @_;
-    
-    say sprintf '{%s} {%s}', ref $data, reftype $data;
-    
-    bless \$data, $class; 
-}
-
-sub STORE 
-{ 
-    #p @_;
-    ${ $_[0] } = $_[1] 
-}
-
-sub FETCH 
-{ 
-    p @_;
-    ${ my $self = shift } 
 }
 
 # ------------------------------------------------------------------------------

@@ -116,9 +116,8 @@ sub commit
     close $self->{workh};
     delete $self->{workh};
     if ( $self->{work} ) {
-        unless ( rename $self->{work}, $self->{params}->{source} ) {
-            return sprintf 'can not rename "%s" to "%s": %s', $self->{work}, $self->{params}->{source}, $ERRNO;
-        }
+        return sprintf 'can not rename "%s" to "%s": %s', $self->{work}, $self->{params}->{source}, $ERRNO
+            unless rename $self->{work}, $self->{params}->{source};
         delete $self->{work};
     }
     return;
@@ -129,9 +128,8 @@ sub rollback
 {
     my ($self) = @_;
     if ( $self->{backup} ) {
-        unless ( rename $self->{backup}, $self->{params}->{source} ) {
-            return sprintf 'can not rename "%s" to "%s": %s', $self->{backup}, $self->{params}->{source}, $ERRNO;
-        }
+        return sprintf 'can not rename "%s" to "%s": %s', $self->{backup}, $self->{params}->{source}, $ERRNO
+            unless rename $self->{backup}, $self->{params}->{source};
         delete $self->{backup};
     }
     return;

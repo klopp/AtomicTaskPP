@@ -3,7 +3,7 @@ package AtomicTaskPP;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use Carp qw/cluck croak/;
+use Carp qw/cluck confess/;
 use Clone qw/clone/;
 use DDP;
 use lib q{.};
@@ -32,15 +32,15 @@ sub new
     my ( $class, $resources, $params ) = @_;
 
     $params //= {};
-    croak 'Invalid {params} value' unless ref $params eq 'HASH';
-    croak 'Invalid {resources} value' if ref $resources ne 'ARRAY' || !@{$resources};
+    confess 'Invalid {params} value' unless ref $params eq 'HASH';
+    confess 'Invalid {resources} value' if ref $resources ne 'ARRAY' || !@{$resources};
 
     srand;
     $params->{id} = int( rand 100_000 ) unless $params->{id};
 
     if ( $params->{mutex} ) {
-        $params->{mutex}->can('lock')   or croak '{mutex} can not lock()!';
-        $params->{mutex}->can('unlock') or croak '{mutex} can not unlock()!';
+        $params->{mutex}->can('lock')   or confess '{mutex} can not lock()!';
+        $params->{mutex}->can('unlock') or confess '{mutex} can not unlock()!';
     }
     else {
         $params->{quiet}
@@ -86,7 +86,7 @@ sub run
                 $self->_delete_backups( $i - 1 );
                 $self->_delete_works( $i - 1 );
             }
-            return croak sprintf "Error creating backup copy: %s\n", $error;
+            return confess sprintf "Error creating backup copy: %s\n", $error;
         }
 
 =for comment
@@ -102,7 +102,7 @@ sub run
         if ($error) {
             $self->_delete_backups($i);
             $self->_delete_works( $i - 1 ) if $i;
-            return croak sprintf "Error creating work copy: %s\n", $error;
+            return confess sprintf "Error creating work copy: %s\n", $error;
         }
     }
     $self->{params}->{mutex}->lock if $self->{params}->{mutex} && !$self->{params}->{commit_lock};
@@ -121,7 +121,7 @@ sub run
         $self->{params}->{mutex}->unlock if $self->{params}->{mutex} && !$self->{params}->{commit_lock};
         $self->_delete_backups;
         $self->_delete_works;
-        return croak sprintf "Error executing task: %s\n", $error;
+        return confess sprintf "Error executing task: %s\n", $error;
     }
 
 =for comment
@@ -141,7 +141,7 @@ sub run
             if ($error) {
                 $self->_rollback;
                 $self->{params}->{mutex}->unlock if $self->{params}->{mutex};
-                return croak sprintf "Error commit changes: %s\n", $error;
+                return confess sprintf "Error commit changes: %s\n", $error;
             }
         }
     }
@@ -163,8 +163,7 @@ sub execute
 =cut
 
     my ($self) = @_;
-    croak sprintf 'Method "$error = %s()" must be overloaded', ( caller 0 )[3];
-    return $self;
+    return confess sprintf 'Method "$error = %s()" must be overloaded', ( caller 0 )[3];
 }
 
 # ------------------------------------------------------------------------------
@@ -174,7 +173,7 @@ sub _rollback
     @{ $self->{resources} } or return;
     $i //= @{ $self->{resources} } - 1;
     for ( 0 .. $i ) {
-        $self->{resources}->[$_]->rollback if $self->{resources}->[$_]->modified;
+        $self->{resources}->[$_]->modified and $self->{resources}->[$_]->rollback;
     }
     return $i;
 }

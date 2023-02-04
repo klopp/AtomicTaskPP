@@ -3,11 +3,7 @@ package Resource::Base;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use Carp qw/cluck/;
-
-#use Clone qw/clone/;
-#use Data::Clone;
-#use Storable qw/dclone/;
+use Carp qw/confess/;
 
 our $VERSION = 'v1.0';
 
@@ -25,14 +21,9 @@ sub new
 
     my ( $class, $params ) = @_;
     $params //= {};
-    ref $params eq 'HASH' or cluck 'Invalid {params} value.';
-    $params->{source}     or cluck 'No {source} in {params}.';
+    ref $params eq 'HASH' or confess 'Invalid {params} value.';
+    $params->{source}     or confess 'No {source} in {params}.';
     $params->{id}         or $params->{id} = int( rand 100_000 );
-
-=for comment
-    my %data = ( modified => 0, params => $params );
-    my $self = bless \%data, $class;
-=cut
 
     my $self = bless {
         params   => $params,
@@ -40,7 +31,7 @@ sub new
         },
         $class;
     my $error = $self->check_params;
-    $error and cluck sprintf 'Invalid parameters: %s', $error;
+    $error and confess sprintf 'Invalid parameters: %s', $error;
     return $self;
 }
 
@@ -62,7 +53,7 @@ sub modified
 sub _emethod
 {
     my ($self) = @_;
-    return cluck sprintf 'Method "$error = %s()" must be overloaded.', ( caller 1 )[3];
+    return confess sprintf 'Method "$error = %s()" must be overloaded.', ( caller 1 )[3];
 }
 
 # ------------------------------------------------------------------------------
