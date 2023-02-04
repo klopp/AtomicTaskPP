@@ -18,8 +18,7 @@ sub new
 
 =for comment
     В {params} ДОЛЖНО быть:
-        {source} ссылка на массив или хэш любой степени вложенности 
-                    НЕ может быть blessed
+        {source} ссылка на скаляр с JSON
     В {params} МОЖЕТ быть:
         {id}
     Структура после полной инициализации:
@@ -46,10 +45,9 @@ sub check_params
 sub create_work_copy
 {
     my ($self) = @_;
-    my $rc = $self->SUPER::create_work_copy;
-    $rc and return $rc;
+    my $error = $self->SUPER::create_work_copy;
+    $error and return $error;
 
-    my $error;
     try {
         $self->{work} = decode_json( $self->{work} );
     }
