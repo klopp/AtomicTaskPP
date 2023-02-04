@@ -4,7 +4,6 @@ package AtomicTaskPP;
 use Modern::Perl;
 
 use Carp qw/cluck confess/;
-use List::Util qw/first/;
 use Time::HiRes qw/gettimeofday/;
 
 use lib q{.};
