@@ -16,7 +16,7 @@ our $VERSION = 'v1.0';
 
 =for comment
     Базовый класс, реализующий псевдо-атомарную задачу. На входе принимает массив
-    потенциально изменяемый ресурсов, см. соответствующие классы Resource::*.
+    потенциально изменяемых ресурсов, см. соответствующие классы Resource::*.
     * Создаёт резервные копии ресурсов для отката изменений (rollback)
     * Создаёт рабочии копии ресурсов
     * Вызывает перегруженный метод execute()
@@ -28,7 +28,7 @@ our $VERSION = 'v1.0';
     
         # Файл отмапленный в память:
         use Resource::MemFile;
-        my $rfm = Resource::MemFile->new( { source => '/my/cool/data/table.xyz', id => 'memfile' } );
+        my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile' } );
 
         # Сложная структура данных:
         use Resource::Data;
@@ -49,11 +49,14 @@ our $VERSION = 'v1.0';
             my $memfile = $self->getr( 'memfile' );
             my $data    = $self->getr( 'data' );
             #
-            # can modify:
-            #       $data->{work} (data copy)
-            #       $memfile->{work} (file content copy)
+            # Что здесь доступно для каждого типа ресурсов
+            #   описано в соответствующих исходниках.
+            #   Основное (а другого и не нужно):
+            #       $data->{work} (копия данных)
+            #       $data->{modified} = 1; (если менялось)
+            #       $memfile->{work} (содержимое файла)
+            #       $memfile->{modified} = 1; (если менялось)
             #            
-            $rs->{modified} = 1;
             return;
         }       
 =cut
