@@ -34,14 +34,6 @@ sub new
 }
 
 # ------------------------------------------------------------------------------
-sub check_params
-{
-    my ($self) = @_;
-    ref $self->{params}->{source} eq 'SCALAR' or return 'ref {params}->{source} is not SCALAR';
-    return;
-}
-
-# ------------------------------------------------------------------------------
 sub create_work_copy
 {
     my ($self) = @_;
