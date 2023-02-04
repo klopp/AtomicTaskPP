@@ -94,12 +94,12 @@ sub new
     }
 
     my %data = (
-        resources  => $resources,
-        params     => $params,
-        id         => $params->{id},
+        resources => $resources,
+        params    => $params,
+        id        => $params->{id},
     );
     $data{id} or $data{id} = join q{.}, ( gettimeofday() );
-    %{$data{_hresources}} = map { $_->id => $_ } @{$data{resources}};
+    %{ $data{_hresources} } = map { $_->id => $_ } @{ $data{resources} };
 
     my $self = bless \%data, $class;
     return $self;
