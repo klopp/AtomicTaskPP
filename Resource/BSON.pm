@@ -18,7 +18,7 @@ sub new
 
 =for comment
     В {params} ДОЛЖНО быть:
-        {source} ссылка на скаляр с JSON
+        {source} ссылка на скаляр с BSON
     В {params} МОЖЕТ быть:
         {id}
         {bson} флаги BSON
