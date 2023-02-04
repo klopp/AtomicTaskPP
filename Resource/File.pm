@@ -51,16 +51,15 @@ sub check_params
 # ------------------------------------------------------------------------------
 sub create_backup_copy
 {
-    my ( $backup, $self ) = ( undef, @_ );
+    my ( $backup, $self ) = @_;
 
     try {
-        ( undef, $backup ) = tempfile DIR => $self->{tempdir};
+        ( undef, $self->{backup} ) = tempfile DIR => $self->{tempdir};
     }
     catch {
         return sprintf 'can not create BACKUP file (%s)', $_;
     };
-    $self->{backup} = $backup;
-    unless ( copy( $self->{params}->{source}, $backup ) ) {
+    unless ( copy( $self->{params}->{source}, $self->{backup} ) ) {
         my $error = $ERRNO;
         $self->delete_backup_copy;
         return sprintf 'can not save BACKUP file (%s)', $ERRNO;
@@ -80,17 +79,15 @@ sub delete_backup_copy
 # ------------------------------------------------------------------------------
 sub create_work_copy
 {
-    my ( $workh, $work, $self ) = ( undef, undef, @_ );
+    my ($self) = @_;
 
     try {
-        ( $workh, $work ) = tempfile DIR => $self->{tempdir};
+        ( $self->{workh}, $self->{work} ) = tempfile DIR => $self->{tempdir};
     }
     catch {
         return sprintf 'can not create WORK file (%s)', $_;
     };
-    $self->{work}  = $work;
-    $self->{workh} = $workh;
-    unless ( copy( $self->{params}->{source}, $work ) ) {
+    unless ( copy( $self->{params}->{source}, $self->{work} ) ) {
         my $error = $ERRNO;
         $self->delete_work_copy;
         return sprintf 'can not save WORK file (%s)', $ERRNO;
@@ -116,8 +113,9 @@ sub commit
     close $self->{workh};
     delete $self->{workh};
     if ( $self->{work} ) {
-        return sprintf 'can not rename "%s" to "%s": %s', $self->{work}, $self->{params}->{source}, $ERRNO
-            unless rename $self->{work}, $self->{params}->{source};
+        rename $self->{work}, $self->{params}->{source}
+            or return sprintf 'can not rename "%s" to "%s": %s', $self->{work}, $self->{params}->{source},
+            $ERRNO;
         delete $self->{work};
     }
     return;
@@ -128,8 +126,9 @@ sub rollback
 {
     my ($self) = @_;
     if ( $self->{backup} ) {
-        return sprintf 'can not rename "%s" to "%s": %s', $self->{backup}, $self->{params}->{source}, $ERRNO
-            unless rename $self->{backup}, $self->{params}->{source};
+        rename $self->{backup}, $self->{params}->{source}
+            or return sprintf 'can not rename "%s" to "%s": %s', $self->{backup}, $self->{params}->{source},
+            $ERRNO;
         delete $self->{backup};
     }
     return;

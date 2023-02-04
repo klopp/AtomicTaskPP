@@ -21,22 +21,22 @@ our $VERSION = 'v1.0';
     * Создаёт резервные копии ресурсов для отката изменений (rollback)
     * Создаёт рабочие копии ресурсов
     * Вызывает перегруженный метод execute()
-    * Заменяет ресурсы изменёнными рабочими копиями если ошибок не случилось
-    * В случае ошибок на любом этапе откатывает затронутые ресурсы на 
+    * Заменяет ресурсы изменёнными рабочими копиями если ошибок не случилось (commit)
+    * В случае ошибок на этапе коммита откатывает затронутые ресурсы на 
         резервные копии
     
     Схема использования:
     
         # Файл отмапленный в память:
         use Resource::MemFile;
-        my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile' } );
+        my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile', } );
 
         # Сложная структура данных:
         use Resource::Data;
         my $data = { ... };
-        my $rd = Resource::Data->new ( { source => \$data, id => 'data' } );
+        my $rd = Resource::Data->new( { source => \$data, id => 'data' }, );
          
-        my $task = MyTask->new( [ $rfm, $rd ], { mutex => Mutex->new } );
+        my $task = MyTask->new( [ $rfm, $rd ], { mutex => Mutex->new }, );
         $task->run;
         exit;
 
@@ -83,7 +83,7 @@ sub new
     my ( $class, $resources, $params ) = @_;
 
     $params //= {};
-    ref $params eq 'HASH'                           or confess 'Error: invalid {params} value';
+    ref $params eq 'HASH'                          or confess 'Error: invalid {params} value';
     ( ref $resources eq 'ARRAY' && @{$resources} ) or confess 'Error: invalid {resources} value';
 
     if ( $params->{mutex} ) {
@@ -100,10 +100,7 @@ sub new
         params    => $params,
         id        => $params->{id},
     );
-
-    unless ( $data{id} ) {
-        $data{id} = join q{.}, (gettimeofday());
-    }
+    $data{id} or $data{id} = join q{.}, ( gettimeofday() );
 
     my $self = bless \%data, $class;
     return $self;
