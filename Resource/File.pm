@@ -26,6 +26,7 @@ sub new
         {tempdir}
         {id}
     Структура после полной инициализации:
+        {id}
         {params}
         {modified}
         {work}     рабочий файл (Path::Tiny)
