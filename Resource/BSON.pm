@@ -1,4 +1,4 @@
-package Resource::JSON;
+package Resource::BSON;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
@@ -21,6 +21,7 @@ sub new
         {source} ссылка на скаляр с JSON
     В {params} МОЖЕТ быть:
         {id}
+        {bson} флаги BSON
     Структура после полной инициализации:
         {id}
         {params}
@@ -30,21 +31,24 @@ sub new
 =cut    
 
     my ( $class, $params ) = @_;
-    return $class->SUPER::new($params);
+    my $self = $class->SUPER::new($params);
+    $self->{bson} = BSON->new( $params->{bson} || {} );
+    return $self;
 }
 
 # ------------------------------------------------------------------------------
 sub create_work_copy
 {
     my ($self) = @_;
+
     my $error = $self->SUPER::create_work_copy;
     $error and return $error;
 
     try {
-        $self->{work} = decode_json( $self->{work} );
+        $self->{work} = $self->{bson}->decode_one( $self->{work} );
     }
     catch {
-        $error = sprintf 'JSON: %s', $_;
+        $error = sprintf 'BSON: %s', $_;
     };
     return $error;
 }
@@ -54,10 +58,10 @@ sub commit
 {
     my ($self) = @_;
     try {
-        $self->{work} = encode_json( $self->{work} );
+        $self->{work} = $self->{bson}->encode_one( $self->{work} );
     }
     catch {
-        return sprintf 'JSON: %s', $_;
+        return sprintf 'BSON: %s', $_;
     };
     return $self->SUPER::commit;
 }
