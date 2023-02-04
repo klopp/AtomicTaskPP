@@ -20,20 +20,21 @@ use Resource::Data;
 #say $data;
 #exit;
 # ------------------------------------------------------------------------------
-my $data1 = '1';
+#my $data1 = '1';
+my $data1 = [1,2,3];
 my $rd = Resource::Data->new( { source => \$data1, }, );
 =for comment
 $rd->create_backup_copy;
 $rd->{modified} = 1;
-$rd->{work} = '123';
+$rd->{work} = [9,9,9];
 $rd->commit;
-say $data1;
+p $data1;
 $rd->rollback;
-say $data1;
+p $data1;
 =cut
 my $dt = Task->new( [$rd], { quiet => 1, }, );
 $dt->run;
-say $data1;
+p $data1;
 
 # ------------------------------------------------------------------------------
 package Task;
@@ -46,7 +47,7 @@ sub execute
     my ($self) = @_;
     for my $rs ( @{ $self->{resources} } ) {
 
-        $rs->{work} = 'execute';
+        $rs->{work} = [4,5,6];
         $rs->{modified} = 1;
     }
     return;

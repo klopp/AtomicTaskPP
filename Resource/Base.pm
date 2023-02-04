@@ -7,7 +7,7 @@ use Carp qw/cluck/;
 
 #use Clone qw/clone/;
 #use Data::Clone;
-use Storable qw/dclone/;
+#use Storable qw/dclone/;
 
 our $VERSION = 'v1.0';
 
@@ -35,9 +35,7 @@ sub new
 =cut
 
     my $self = bless {
-        params => $params,
-
-        #params   => $params,
+        params   => $params,
         modified => 0,
         },
         $class;

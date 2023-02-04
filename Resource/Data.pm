@@ -37,7 +37,7 @@ sub new
 #    tie ${$params->{source}}, 'Resource::DataScalar', $params->{backup};
     
     my $self = $class->SUPER::new($params);
-    $self->{backup} = ${$params->{source}};
+#    $self->{backup} = ${$params->{source}};
 #    print DDump($params->{source});
 #    print "\n\n";
 #    print DDump($self->{params}->{source});
