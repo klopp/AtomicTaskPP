@@ -36,6 +36,7 @@ sub new
 sub check_params
 {
     my ($self) = @_;
+    ref $self->{params}->{source} eq 'REF' or return '{params}->{source} is not REF';
     return;
 }
 
