@@ -29,7 +29,7 @@ our $VERSION = 'v1.0';
     
         # Файл отмапленный в память:
         use Resource::MemFile;
-        my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile', } );
+        my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile' }, );
 
         # Сложная структура данных:
         use Resource::Data;
@@ -132,24 +132,6 @@ sub run
         my $rs = $self->{resources}->[$i];
 
 =for comment
-    Создаём копию ресурса для отката
-=cut
-
-        $error = $rs->create_backup_copy;
-
-=for comment
-    При ошибке удаляем все временные ресурсы и уходим
-=cut
-
-        if ($error) {
-            if ($i) {
-                $self->_delete_backups( $i - 1 );
-                $self->_delete_works( $i - 1 );
-            }
-            return confess sprintf "Error creating backup copy: %s\n", $error;
-        }
-
-=for comment
     Создаём рабочую копию ресурса
 =cut
 
@@ -160,8 +142,9 @@ sub run
 =cut
 
         if ($error) {
-            $self->_delete_backups($i);
-            $self->_delete_works( $i - 1 ) if $i;
+
+            #            $self->_delete_backups($i);
+            $i and $self->_delete_works( $i - 1 );
             return confess sprintf "Error creating work copy: %s\n", $error;
         }
     }
@@ -179,7 +162,8 @@ sub run
 
     if ($error) {
         $self->{params}->{mutex}->unlock if $self->{params}->{mutex} && !$self->{params}->{commit_lock};
-        $self->_delete_backups;
+
+        #        $self->_delete_backups;
         $self->_delete_works;
         return confess sprintf "Error executing task: %s\n", $error;
     }
@@ -192,6 +176,13 @@ sub run
     for ( my $i = 0; $i < @{ $self->{resources} }; ++$i ) {
         my $rs = $self->{resources}->[$i];
         if ( $rs->modified ) {
+            $error = $rs->create_backup_copy;
+            if ($error) {
+                $self->_rollback;
+                $self->{params}->{mutex}->unlock if $self->{params}->{mutex};
+                return confess sprintf "Error creating backup copy: %s\n", $error;
+            }
+
             $error = $rs->commit;
 
 =for comment
@@ -229,25 +220,25 @@ sub execute
 # ------------------------------------------------------------------------------
 sub _rollback
 {
-    my ( $self, $i ) = @_;
-    @{ $self->{resources} } or return;
-    $i //= @{ $self->{resources} } - 1;
-    for ( 0 .. $i ) {
-        $self->{resources}->[$_]->modified and $self->{resources}->[$_]->rollback;
+    my ($self) = @_;
+    for ( @{ $self->{resources} } ) {
+        if ( $_->modified ) {
+            $_->rollback;
+            $_->delete_bakup_copy;
+        }
+        $_->delete_work_copy;
     }
-    return $i;
+    return;
 }
 
 # ------------------------------------------------------------------------------
 sub _delete_backups
 {
-    my ( $self, $i ) = @_;
-    @{ $self->{resources} } or return;
-    $i //= @{ $self->{resources} } - 1;
-    for ( 0 .. $i ) {
-        $self->{resources}->[$_]->delete_backup_copy;
+    my ($self) = @_;
+    for ( @{ $self->{resources} } ) {
+        $_->modified and $_->delete_backup_copy;
     }
-    return $i;
+    return;
 }
 
 # ------------------------------------------------------------------------------
