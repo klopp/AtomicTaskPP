@@ -1,10 +1,10 @@
-package Resource::BSON;
+package Resource::XML;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use BSON;
 use Try::Tiny;
+use XML::Hash::XS;
 
 use lib q{..};
 use Resource::Data;
@@ -18,10 +18,10 @@ sub new
 
 =for comment
     В {params} ДОЛЖНО быть:
-        {source} ссылка на скаляр с BSON
+        {source} ссылка на скаляр с JSON
     В {params} МОЖЕТ быть:
         {id}
-        {bson} флаги BSON
+        {xml} флаги XML::Hash::XS
     Структура после полной инициализации:
         {id}
         {params}
@@ -32,7 +32,9 @@ sub new
 
     my ( $class, $params ) = @_;
     my $self = $class->SUPER::new($params);
-    $self->{bson} = BSON->new( $params->{bson} || {} );
+
+    # output in SCALAR only:
+    delete $self->{params}->{xml}->{output};
     return $self;
 }
 
@@ -45,10 +47,10 @@ sub create_work_copy
     $error and return $error;
 
     try {
-        $self->{work} = $self->{bson}->decode_one( $self->{work} );
+        $self->{work} = xml2hash( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        $error = sprintf 'BSON: %s', $_;
+        $error = sprintf 'XML: %s', $_;
     };
     return $error;
 }
@@ -58,10 +60,10 @@ sub commit
 {
     my ($self) = @_;
     try {
-        $self->{work} = $self->{bson}->encode_one( $self->{work} );
+        $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        return sprintf 'BSON: %s', $_;
+        return sprintf 'XML: %s', $_;
     };
     return $self->SUPER::commit;
 }
