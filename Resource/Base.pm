@@ -63,7 +63,8 @@ sub id
 # ------------------------------------------------------------------------------
 sub modified
 {
-    my ($self) = @_;
+    my ($self, $value) = @_;
+    $value and $self->{modified} = $value;
     return $self->{modified};
 }
 
