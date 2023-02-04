@@ -4,7 +4,7 @@ package Resource::MemFile;
 use Modern::Perl;
 
 use Carp;
-use File::Slurper qw/read_text read_binary write_text write_binary/;
+use Path::Tiny;
 use Try::Tiny;
 
 use lib q{..};
@@ -22,9 +22,7 @@ sub new
         {source}
     В {params} МОЖЕТ быть:
         {id}
-        {textmode} тектовый режим
-        {encoding} кодировка для текстового режима
-        {crlf}     интерпретация crlf (см. File::Slurper)
+        {encoding} кодировка 
     Структура после полной инициализации:
         {params}
         {modified} 
@@ -48,16 +46,12 @@ sub create_backup_copy
     my ($self) = @_;
 
     try {
-        if ( $self->{params}->{textmode} ) {
-            $self->{backup}
-                = read_text( $self->{params}->{source}, $self->{params}->{encoding}, $self->{params}->{crlf} );
-        }
-        else {
-            $self->{backup} = read_binary( $self->{params}->{source} );
-        }
+        my $encoding = ':raw';
+        $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
+        $self->{backup} = path( $self->{params}->{source} )->slurp( { binmode => $encoding } );
     }
     catch {
-        return sprintf 'can not create BACKUP file (%s)', $_;
+        return sprintf 'create BACKUP file (%s)', $_;
     };
     return;
 }
@@ -76,16 +70,12 @@ sub create_work_copy
     my ($self) = @_;
 
     try {
-        if ( $self->{params}->{textmode} ) {
-            $self->{work}
-                = read_text( $self->{params}->{source}, $self->{params}->{encoding}, $self->{params}->{crlf} );
-        }
-        else {
-            $self->{work} = read_binary( $self->{params}->{source} );
-        }
+        my $encoding = ':raw';
+        $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
+        $self->{work} = path( $self->{params}->{source} )->slurp( { binmode => $encoding } );
     }
     catch {
-        return sprintf 'can not create WORK file (%s)', $_;
+        return sprintf 'create WORK file (%s)', $_;
     };
     return;
 }
@@ -103,17 +93,13 @@ sub commit
 {
     my ($self) = @_;
     try {
-        if ( $self->{params}->{textmode} ) {
-            write_text( $self->{params}->{source}, $self->{work}, $self->{params}->{encoding},
-                $self->{params}->{crlf} );
-        }
-        else {
-            write_binary( $self->{params}->{source}, $self->{work} );
-        }
+        my $encoding = ':raw';
+        $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
+        path( $self->{params}->{source} )->spew( { binmode => $encoding }, $self->{work} );
         delete $self->{work};
     }
     catch {
-        return sprintf 'can not overwrite source file "%s" (%s)', $self->{params}->{source}, $_;
+        return sprintf 'overwrite source file "%s" (%s)', $self->{params}->{source}, $_
     };
     return;
 }
@@ -122,24 +108,17 @@ sub commit
 sub rollback
 {
     my ($self) = @_;
-    try {
-        if ( $self->{params}->{textmode} ) {
-
-            write_text(
-                $self->{params}->{source},
-                $self->{backup},
-                $self->{params}->{encoding},
-                $self->{params}->{crlf}
-            );
+    if ( $self->{backup} ) {
+        try {
+            my $encoding = ':raw';
+            $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
+            path( $self->{params}->{source} )->spew( { binmode => $encoding }, $self->{backup} );
+            delete $self->{backup};
         }
-        else {
-            write_binary( $self->{params}->{source}, $self->{backup} );
-        }
-        delete $self->{backup};
+        catch {
+            return sprintf 'overwrite source file "%s" (%s)', $self->{params}->{source}, $_;
+        };
     }
-    catch {
-        return sprintf 'can not overwrite source file "%s" (%s)', $self->{params}->{source}, $_;
-    };
     return;
 }
 

@@ -6,8 +6,7 @@ use warnings;
 
 use Carp;
 use English qw/-no_match_vars/;
-use File::Copy qw/copy/;
-use File::Temp qw/tempfile/;
+use Path::Tiny;
 use Try::Tiny;
 
 use lib q{..};
@@ -51,19 +50,15 @@ sub check_params
 # ------------------------------------------------------------------------------
 sub create_backup_copy
 {
-    my ( $backup, $self ) = @_;
+    my ($self) = @_;
 
     try {
-        ( undef, $self->{backup} ) = tempfile DIR => $self->{tempdir};
+        $self->{backup} = Path::Tiny->tempfile( DIR => $self->{tempdir} );
+        path( $self->{params}->{source} )->copy( $self->{backup} );
     }
     catch {
-        return sprintf 'can not create BACKUP file (%s)', $_;
+        return sprintf 'BACKUP file (%s)', $_;
     };
-    unless ( copy( $self->{params}->{source}, $self->{backup} ) ) {
-        my $error = $ERRNO;
-        $self->delete_backup_copy;
-        return sprintf 'can not save BACKUP file (%s)', $ERRNO;
-    }
     return;
 }
 
@@ -71,7 +66,7 @@ sub create_backup_copy
 sub delete_backup_copy
 {
     my ($self) = @_;
-    $self->{backup} and unlink $self->{backup};
+    $self->{backup} and path( $self->{backup} )->remove;
     delete $self->{backup};
     return;
 }
@@ -82,16 +77,13 @@ sub create_work_copy
     my ($self) = @_;
 
     try {
-        ( $self->{workh}, $self->{work} ) = tempfile DIR => $self->{tempdir};
+        $self->{work}  = Path::Tiny->tempfile( DIR => $self->{tempdir} );
+        $self->{workh} = $self->{work}->filehandle;
+        path( $self->{params}->{source} )->copy( $self->{work} );
     }
     catch {
-        return sprintf 'can not create WORK file (%s)', $_;
+        return sprintf 'WORK file (%s)', $_;
     };
-    unless ( copy( $self->{params}->{source}, $self->{work} ) ) {
-        my $error = $ERRNO;
-        $self->delete_work_copy;
-        return sprintf 'can not save WORK file (%s)', $ERRNO;
-    }
     return;
 }
 
@@ -99,8 +91,10 @@ sub create_work_copy
 sub delete_work_copy
 {
     my ($self) = @_;
-    $self->{workh} and close $self->{workh};
-    $self->{work}  and unlink $self->{work};
+    if ( $self->{work} ) {
+        $self->{workh} and close $self->{workh};
+        path( $self->{work} )->remove;
+    }
     delete $self->{workh};
     delete $self->{work};
     return;
@@ -110,12 +104,15 @@ sub delete_work_copy
 sub commit
 {
     my ($self) = @_;
-    close $self->{workh};
-    delete $self->{workh};
     if ( $self->{work} ) {
-        rename $self->{work}, $self->{params}->{source}
-            or return sprintf 'can not rename "%s" to "%s": %s', $self->{work}, $self->{params}->{source},
-            $ERRNO;
+        $self->{workh} and close $self->{workh};
+        delete $self->{workh};
+        try {
+            $self->{work}->move( $self->{params}->{source} );
+        }
+        catch {
+            return sprintf 'rename "%s" to "%s": %s', $self->{work}, $self->{params}->{source}, $_;
+        }
         delete $self->{work};
     }
     return;
@@ -126,9 +123,12 @@ sub rollback
 {
     my ($self) = @_;
     if ( $self->{backup} ) {
-        rename $self->{backup}, $self->{params}->{source}
-            or return sprintf 'can not rename "%s" to "%s": %s', $self->{backup}, $self->{params}->{source},
-            $ERRNO;
+        try {
+            $self->{backup}->move( $self->{params}->{source} );
+        }
+        catch {
+            return sprintf 'rename "%s" to "%s": %s', $self->{backup}, $self->{params}->{source}, $_;
+        }
         delete $self->{backup};
     }
     return;
