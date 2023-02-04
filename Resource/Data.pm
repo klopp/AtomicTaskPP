@@ -31,15 +31,20 @@ sub new
 =cut    
 
     my ( $class, $params ) = @_;
-    my $self = $class->SUPER::new($params);
-    return $self;
+    return $class->SUPER::new($params);
 }
 
 # ------------------------------------------------------------------------------
 sub check_params
 {
     my ($self) = @_;
-    ref $self->{params}->{source} eq 'REF' or return '{params}->{source} is not REF';
+
+    if (   ref $self->{params}->{source} ne 'REF'
+        && ref $self->{params}->{source} ne 'SCALAR' )
+    {
+
+        return 'ref {params}->{source} is not REF or SCALAR';
+    }
     return;
 }
 
