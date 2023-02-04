@@ -45,10 +45,9 @@ sub check_params
 sub create_work_copy
 {
     my ($self) = @_;
-    my $rc = $self->SUPER::create_work_copy;
-    $rc and return $rc;
+    my $error = $self->SUPER::create_work_copy;
+    $error and return $error;
 
-    my $error;
     try {
         $self->{work} = decode_json( $self->{work} );
     }
