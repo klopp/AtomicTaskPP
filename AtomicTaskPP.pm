@@ -126,10 +126,11 @@ sub getr
 # ------------------------------------------------------------------------------
 sub run
 {
-    my ( $error, $self ) = ( undef, @_ );
+    my ( $self ) = @_;
 
-    for ( my $i = 0; $i < @{ $self->{resources} }; ++$i ) {
-        my $rs = $self->{resources}->[$i];
+    my $error;
+    for ( 0 .. @{ $self->{resources} } - 1 ) {
+        my $rs = $self->{resources}->[$_];
 
 =for comment
     Создаём рабочую копию ресурса
@@ -142,7 +143,7 @@ sub run
 =cut
 
         if ($error) {
-            $i and $self->_delete_works( $i - 1 );
+            $_ and $self->_delete_works( $_ - 1 );
             return confess sprintf "Error creating work copy: %s\n", $error;
         }
     }
@@ -169,12 +170,12 @@ sub run
 =cut
 
     $self->{params}->{mutex}->lock if $self->{params}->{mutex} && $self->{params}->{commit_lock};
-    for ( my $i = 0; $i < @{ $self->{resources} }; ++$i ) {
-        my $rs = $self->{resources}->[$i];
+    for ( 0 .. @{ $self->{resources} } - 1 ) {
+        my $rs = $self->{resources}->[$_];
         if ( $rs->modified ) {
             $error = $rs->create_backup_copy;
             if ($error) {
-                $self->_rollback($i);
+                $self->_rollback($_);
                 $self->{params}->{mutex}->unlock if $self->{params}->{mutex};
                 return confess sprintf "Error creating backup copy: %s\n", $error;
             }
@@ -186,7 +187,7 @@ sub run
 =cut
 
             if ($error) {
-                $self->_rollback($i);
+                $self->_rollback($_);
                 $self->{params}->{mutex}->unlock if $self->{params}->{mutex};
                 return confess sprintf "Error commit changes: %s\n", $error;
             }
@@ -210,14 +211,13 @@ sub execute
 =cut
 
     my ($self) = @_;
-    return confess sprintf 'Error: method "$error = %s()" must be overloaded', ( caller 0 )[3];
+    return confess sprintf 'Error: method "error = %s()" must be overloaded', ( caller 0 )[3];
 }
 
 # ------------------------------------------------------------------------------
 sub _rollback
 {
     my ( $self, $i ) = @_;
-    @{ $self->{resources} } or return;
     $i //= @{ $self->{resources} } - 1;
     for ( 0 .. $i ) {
         my $rs = $self->{resources}->[$_];
@@ -245,7 +245,6 @@ sub _delete_backups
 sub _delete_works
 {
     my ( $self, $i ) = @_;
-    @{ $self->{resources} } or return;
     $i //= @{ $self->{resources} } - 1;
     for ( 0 .. $i ) {
         $self->{resources}->[$_]->delete_work_copy;

@@ -77,7 +77,7 @@ sub modified
 sub _emethod
 {
     my ($self) = @_;
-    return confess sprintf 'Error: method "$error = %s()" must be overloaded.', ( caller 1 )[3];
+    return confess sprintf 'Error: method "error = %s()" must be overloaded.', ( caller 1 )[3];
 }
 
 # ------------------------------------------------------------------------------
