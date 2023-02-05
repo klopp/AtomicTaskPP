@@ -173,7 +173,7 @@ sub run
         if ( $rs->modified ) {
             $error = $rs->create_backup_copy;
             if ($error) {
-                $self->_rollback;
+                $self->_rollback($i);
                 $self->{params}->{mutex}->unlock if $self->{params}->{mutex};
                 return confess sprintf "Error creating backup copy: %s\n", $error;
             }
@@ -185,7 +185,7 @@ sub run
 =cut
 
             if ($error) {
-                $self->_rollback;
+                $self->_rollback($i);
                 $self->{params}->{mutex}->unlock if $self->{params}->{mutex};
                 return confess sprintf "Error commit changes: %s\n", $error;
             }
@@ -215,11 +215,15 @@ sub execute
 # ------------------------------------------------------------------------------
 sub _rollback
 {
-    my ($self) = @_;
-    for ( @{ $self->{resources} } ) {
-        if ( $_->modified ) {
-            $_->rollback;
-            $_->delete_bakup_copy;
+    my ($self, $i) = @_;
+    @{ $self->{resources} } or return;
+    $i //= @{ $self->{resources} } - 1;
+    for ( 0 .. $i ) {
+        my $rs = $self->{resources}->[$_];
+        next unless $rs;
+        if ( $rs->modified ) {
+            $rs->rollback;
+            $rs->delete_bakup_copy;
         }
         $_->delete_work_copy;
     }
