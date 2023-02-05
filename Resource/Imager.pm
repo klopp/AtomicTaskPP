@@ -1,4 +1,4 @@
-package Resource::Image;
+package Resource::Imager;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
