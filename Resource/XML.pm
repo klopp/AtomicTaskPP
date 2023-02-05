@@ -60,7 +60,7 @@ sub commit
 {
     my ($self) = @_;
     try {
-        $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );
+        $self->{work} and $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
         return sprintf 'XML: %s', $_;

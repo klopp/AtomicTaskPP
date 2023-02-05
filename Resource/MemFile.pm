@@ -38,7 +38,7 @@ sub new
     my $encoding = ':raw';
     $params->{encoding} and $encoding .= sprintf ':encoding(%s)', $params->{encoding};
     $self->{_filemode} = { binmode => $encoding };
-    
+
     return $self;
 }
 
@@ -91,8 +91,7 @@ sub commit
 {
     my ($self) = @_;
     try {
-        path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{work} );
-        delete $self->{work};
+        $self->{work} and path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{work} );
     }
     catch {
         return sprintf 'file "%s" (%s)', $self->{params}->{source}, $_
@@ -104,15 +103,12 @@ sub commit
 sub rollback
 {
     my ($self) = @_;
-    if ( $self->{backup} ) {
-        try {
-            path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{backup} );
-            delete $self->{backup};
-        }
-        catch {
-            return sprintf 'file "%s" (%s)', $self->{params}->{source}, $_;
-        };
+    try {
+        $self->{backup} and path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{backup} );
     }
+    catch {
+        return sprintf 'file "%s" (%s)', $self->{params}->{source}, $_;
+    };
     return;
 }
 
