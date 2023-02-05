@@ -49,7 +49,7 @@ sub create_backup_copy
         path( $self->{params}->{source} )->copy( $self->{backup} );
     }
     catch {
-        $error = $_;
+        $error = sprintf 'File :: %s', $_;
     };
     return $error;
 }
@@ -74,7 +74,7 @@ sub create_work_copy
         path( $self->{params}->{source} )->copy( $self->{work} );
     }
     catch {
-        $error = $_;
+        $error = sprintf 'File :: %s', $_;
     };
     return $error;
 }
@@ -98,7 +98,7 @@ sub commit
         $self->{work} and $self->{work}->move( $self->{params}->{source} );
     }
     catch {
-        $error = sprintf 'file "%s": %s', $self->{params}->{source}, $_;
+        $error = sprintf 'File :: "%s": %s', $self->{params}->{source}, $_;
     }
     return $error;
 }
@@ -113,7 +113,7 @@ sub rollback
         $self->{backup} and $self->{backup}->move( $self->{params}->{source} );
     }
     catch {
-        $error = sprintf 'file "%s": %s', $self->{params}->{source}, $_;
+        $error = sprintf 'File :: "%s": %s', $self->{params}->{source}, $_;
     }
     return $error;
 }

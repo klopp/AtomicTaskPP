@@ -51,7 +51,7 @@ sub create_backup_copy
         $self->{backup} = path( $self->{params}->{source} )->slurp( $self->{_filemode} );
     }
     catch {
-        $error = $_;
+        $error = sprintf 'MemFile :: %s', $_;
     };
     return $error;
 }
@@ -74,7 +74,7 @@ sub create_work_copy
         $self->{work} = path( $self->{params}->{source} )->slurp( $self->{_filemode} );
     }
     catch {
-        $error = $_;
+        $error = sprintf 'MemFile :: %s', $_;
     };
     return $error;
 }
@@ -97,7 +97,7 @@ sub commit
         $self->{work} and path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{work} );
     }
     catch {
-        $error = sprintf 'file "%s" (%s)', $self->{params}->{source}, $_
+        $error = sprintf 'MemFile :: "%s" (%s)', $self->{params}->{source}, $_
     };
     return $error;
 }
@@ -112,7 +112,7 @@ sub rollback
         $self->{backup} and path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{backup} );
     }
     catch {
-        $error = sprintf 'file "%s" (%s)', $self->{params}->{source}, $_;
+        $error = sprintf 'MemFile :: "%s" (%s)', $self->{params}->{source}, $_;
     };
     return $error;
 }

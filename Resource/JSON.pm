@@ -3,6 +3,7 @@ package Resource::JSON;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
+use Carp qw/confess/;
 use JSON::XS;
 use Try::Tiny;
 
@@ -21,6 +22,7 @@ sub new
         {source} ссылка на скаляр с JSON
     В {params} МОЖЕТ быть:
         {id}
+        {json} список методов для инициализации JSON::XS в формате { метод=>зачение, ...}
     Структура после полной инициализации:
         {id}
         {params}
@@ -30,7 +32,18 @@ sub new
 =cut    
 
     my ( $class, $params ) = @_;
-    return $class->SUPER::new($params);
+    my $self = $class->SUPER::new($params);
+
+    $self->{json} = JSON::XS->new;
+    try {
+        while ( my ( $method, $value ) = each %{ $self->{params}->{json} } ) {
+            $self->{json}->$method($value);
+        }
+    }
+    catch {
+        confess sprintf 'JSON :: %s', $_;
+    };
+    return $self;
 }
 
 # ------------------------------------------------------------------------------
@@ -41,10 +54,10 @@ sub create_work_copy
     $error and return $error;
 
     try {
-        $self->{work} = decode_json( $self->{work} );
+        $self->{work} = $self->{json}->decode( $self->{work} );
     }
     catch {
-        $error = sprintf 'JSON: %s', $_;
+        $error = sprintf 'JSON :: %s', $_;
     };
     return $error;
 }
@@ -56,10 +69,10 @@ sub commit
 
     my $error;
     try {
-        $self->{work} and $self->{work} = encode_json( $self->{work} );
+        $self->{work} and $self->{work} = $self->{json}->encode( $self->{work} );
     }
     catch {
-        $error = sprintf 'JSON: %s', $_;
+        $error = sprintf 'JSON :: %s', $_;
     };
     return $error ? $error : $self->SUPER::commit;
 }

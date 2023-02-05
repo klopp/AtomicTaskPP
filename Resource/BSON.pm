@@ -48,7 +48,7 @@ sub create_work_copy
         $self->{work} = $self->{bson}->decode_one( $self->{work} );
     }
     catch {
-        $error = sprintf 'BSON: %s', $_;
+        $error = sprintf 'BSON :: %s', $_;
     };
     return $error;
 }
@@ -63,7 +63,7 @@ sub commit
         $self->{work} and $self->{work} = $self->{bson}->encode_one( $self->{work} );
     }
     catch {
-        $error = sprintf 'BSON: %s', $_;
+        $error = sprintf 'BSON :: %s', $_;
     };
     return $error ? $error : $self->SUPER::commit;
 }
