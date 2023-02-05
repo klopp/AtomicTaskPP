@@ -2,6 +2,8 @@ package Resource::MemFile;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
+use utf8::all;
+use open qw/:std :utf8/;
 
 use Carp;
 use Path::Tiny;
@@ -32,7 +34,12 @@ sub new
 =cut    
 
     my ( $class, $params ) = @_;
-    return $class->SUPER::new($params);
+    my $self     = $class->SUPER::new($params);
+    my $encoding = ':raw';
+    $params->{encoding} and $encoding .= sprintf ':encoding(%s)', $params->{encoding};
+    $self->{_filemode} = { binmode => $encoding };
+    
+    return $self;
 }
 
 # ------------------------------------------------------------------------------
@@ -41,9 +48,7 @@ sub create_backup_copy
     my ($self) = @_;
 
     try {
-        my $encoding = ':raw';
-        $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
-        $self->{backup} = path( $self->{params}->{source} )->slurp( { binmode => $encoding } );
+        $self->{backup} = path( $self->{params}->{source} )->slurp( $self->{_filemode} );
     }
     catch {
         return $_;
@@ -65,9 +70,7 @@ sub create_work_copy
     my ($self) = @_;
 
     try {
-        my $encoding = ':raw';
-        $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
-        $self->{work} = path( $self->{params}->{source} )->slurp( { binmode => $encoding } );
+        $self->{work} = path( $self->{params}->{source} )->slurp( $self->{_filemode} );
     }
     catch {
         return $_;
@@ -88,9 +91,7 @@ sub commit
 {
     my ($self) = @_;
     try {
-        my $encoding = ':raw';
-        $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
-        path( $self->{params}->{source} )->spew( { binmode => $encoding }, $self->{work} );
+        path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{work} );
         delete $self->{work};
     }
     catch {
@@ -105,9 +106,7 @@ sub rollback
     my ($self) = @_;
     if ( $self->{backup} ) {
         try {
-            my $encoding = ':raw';
-            $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
-            path( $self->{params}->{source} )->spew( { binmode => $encoding }, $self->{backup} );
+            path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{backup} );
             delete $self->{backup};
         }
         catch {
