@@ -60,6 +60,8 @@ our $VERSION = 'v1.0';
         }       
 =cut
 
+our %TASKS;
+
 # ------------------------------------------------------------------------------
 sub new
 {
@@ -99,9 +101,10 @@ sub new
         id        => $params->{id},
     );
     $data{id} or $data{id} = join q{.}, ( gettimeofday() );
-    %{ $data{_hresources} } = map { $_->id => $_ } @{ $data{resources} };
+    exists $TASKS{ $data{id} } and confess sprintf 'Error: task ID "%s" already exists!', $data{id};
 
     my $self = bless \%data, $class;
+    $TASKS{ $self->{id} } = $self;
     return $self;
 }
 
@@ -116,7 +119,7 @@ sub id
 sub getr
 {
     my ( $self, $id ) = @_;
-    return $self->{_hresources}->{$id};
+    return $Resource::Base::RESOURCES{$id};
 }
 
 # ------------------------------------------------------------------------------
