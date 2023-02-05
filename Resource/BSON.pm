@@ -58,7 +58,7 @@ sub commit
 {
     my ($self) = @_;
     try {
-        $self->{work} = $self->{bson}->encode_one( $self->{work} );
+        $self->{work} and $self->{work} = $self->{bson}->encode_one( $self->{work} );
     }
     catch {
         return sprintf 'BSON: %s', $_;
