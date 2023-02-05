@@ -53,12 +53,12 @@ sub create_work_copy
 sub commit
 {
     my ($self) = @_;
-    try {
-        $self->{work} = encode_json( $self->{work} );
-    }
-    catch {
-        return sprintf 'JSON: %s', $_;
-    };
+        try {
+            $self->{work} and $self->{work} = encode_json( $self->{work} );
+        }
+        catch {
+            return sprintf 'JSON: %s', $_;
+        };
     return $self->SUPER::commit;
 }
 

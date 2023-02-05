@@ -57,12 +57,14 @@ sub create_work_copy
 sub commit
 {
     my ($self) = @_;
-    try {
-        $self->{work} = $self->{bson}->encode_one( $self->{work} );
+    if ( $self->{work} ) {
+        try {
+            $self->{work} = $self->{bson}->encode_one( $self->{work} );
+        }
+        catch {
+            return sprintf 'BSON: %s', $_;
+        };
     }
-    catch {
-        return sprintf 'BSON: %s', $_;
-    };
     return $self->SUPER::commit;
 }
 

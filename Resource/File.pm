@@ -93,14 +93,11 @@ sub delete_work_copy
 sub commit
 {
     my ($self) = @_;
-    if ( $self->{work} ) {
-        try {
-            $self->{work}->move( $self->{params}->{source} );
-        }
-        catch {
-            return sprintf 'file "%s": %s', $self->{params}->{source}, $_;
-        }
-        delete $self->{work};
+    try {
+        $self->{work} and $self->{work}->move( $self->{params}->{source} );
+    }
+    catch {
+        return sprintf 'file "%s": %s', $self->{params}->{source}, $_;
     }
     return;
 }
@@ -109,14 +106,11 @@ sub commit
 sub rollback
 {
     my ($self) = @_;
-    if ( $self->{backup} ) {
-        try {
-            $self->{backup}->move( $self->{params}->{source} );
-        }
-        catch {
-            return sprintf 'file "%s": %s', $self->{params}->{source}, $_;
-        }
-        delete $self->{backup};
+    try {
+        $self->{backup} and $self->{backup}->move( $self->{params}->{source} );
+    }
+    catch {
+        return sprintf 'file "%s": %s', $self->{params}->{source}, $_;
     }
     return;
 }
