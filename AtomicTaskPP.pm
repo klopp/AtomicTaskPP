@@ -28,14 +28,14 @@ our %TASKS;
     
         # Файл отмапленный в память:
         use Resource::MemFile;
-        my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile' }, );
+        my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile', }, );
 
         # Сложная структура данных:
         use Resource::Data;
         my $data = { ... };
-        my $rd = Resource::Data->new( { source => \$data, id => 'data' }, );
+        my $rd = Resource::Data->new( { source => \$data, id => 'data', }, );
          
-        my $task = MyTask->new( [ $rfm, $rd ], { mutex => Mutex->new }, );
+        my $task = MyTask->new( [ $rfm, $rd ], { mutex => Mutex->new, }, );
         $task->run;
         exit;
 
@@ -46,8 +46,8 @@ our %TASKS;
         {
             my ($self) = @_;
             
-            my $memfile = $self->getr( 'memfile' );
-            my $data    = $self->getr( 'data' );
+            my $memfile = $self->rget( 'memfile' );
+            my $data    = $self->rget( 'data' );
             #
             # Что здесь доступно для каждого типа ресурсов
             #   описано в соответствующих исходниках.
