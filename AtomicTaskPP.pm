@@ -215,7 +215,7 @@ sub execute
 # ------------------------------------------------------------------------------
 sub _rollback
 {
-    my ($self, $i) = @_;
+    my ( $self, $i ) = @_;
     @{ $self->{resources} } or return;
     $i //= @{ $self->{resources} } - 1;
     for ( 0 .. $i ) {
@@ -225,7 +225,7 @@ sub _rollback
             $rs->rollback;
             $rs->delete_bakup_copy;
         }
-        $_->delete_work_copy;
+        $rs->delete_work_copy;
     }
     return;
 }

@@ -71,7 +71,7 @@ sub create_work_copy
     my ($self) = @_;
 
     try {
-        $self->{work}  = Path::Tiny->tempfile( DIR => $self->{tempdir} );
+        $self->{work} = Path::Tiny->tempfile( DIR => $self->{tempdir} );
         path( $self->{params}->{source} )->copy( $self->{work} );
     }
     catch {
@@ -84,9 +84,7 @@ sub create_work_copy
 sub delete_work_copy
 {
     my ($self) = @_;
-    if ( $self->{work} ) {
-        path( $self->{work} )->remove;
-    }
+    $self->{work} and path( $self->{work} )->remove;
     delete $self->{work};
     return;
 }
