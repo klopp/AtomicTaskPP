@@ -57,13 +57,15 @@ sub create_work_copy
 sub commit
 {
     my ($self) = @_;
+
+    my $error;
     try {
         $self->{work} and $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        return sprintf 'XML: %s', $_;
+        $error = sprintf 'XML: %s', $_;
     };
-    return $self->SUPER::commit;
+    return $error ? $error : $self->SUPER::commit;
 }
 
 # ------------------------------------------------------------------------------

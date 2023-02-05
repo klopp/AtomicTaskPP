@@ -46,13 +46,14 @@ sub create_backup_copy
 {
     my ($self) = @_;
 
+    my $error;
     try {
         $self->{backup} = path( $self->{params}->{source} )->slurp( $self->{_filemode} );
     }
     catch {
-        return $_;
+        $error = $_;
     };
-    return;
+    return $error;
 }
 
 # ------------------------------------------------------------------------------
@@ -68,13 +69,14 @@ sub create_work_copy
 {
     my ($self) = @_;
 
+    my $error;
     try {
         $self->{work} = path( $self->{params}->{source} )->slurp( $self->{_filemode} );
     }
     catch {
-        return $_;
+        $error = $_;
     };
-    return;
+    return $error;
 }
 
 # ------------------------------------------------------------------------------
@@ -89,26 +91,30 @@ sub delete_work_copy
 sub commit
 {
     my ($self) = @_;
+
+    my $error;
     try {
         $self->{work} and path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{work} );
     }
     catch {
-        return sprintf 'file "%s" (%s)', $self->{params}->{source}, $_
+        $error = sprintf 'file "%s" (%s)', $self->{params}->{source}, $_
     };
-    return;
+    return $error;
 }
 
 # ------------------------------------------------------------------------------
 sub rollback
 {
     my ($self) = @_;
+
+    my $error;
     try {
         $self->{backup} and path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{backup} );
     }
     catch {
-        return sprintf 'file "%s" (%s)', $self->{params}->{source}, $_;
+        $error = sprintf 'file "%s" (%s)', $self->{params}->{source}, $_;
     };
-    return;
+    return $error;
 }
 
 # ------------------------------------------------------------------------------

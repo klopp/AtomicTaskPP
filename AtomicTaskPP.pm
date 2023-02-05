@@ -65,6 +65,13 @@ our %TASKS;
 =cut
 
 # ------------------------------------------------------------------------------
+sub _trim {
+    @_ = @_ ? @_ : $_ if defined wantarray;
+    s/^\s+|\s+$//gsm for @_ ? @_ : $_;
+    wantarray ? @_ : shift;
+}
+
+# ------------------------------------------------------------------------------
 sub new
 {
 
@@ -147,7 +154,7 @@ sub run
 
         if ($error) {
             $_ and $self->_delete_works( $_ - 1 );
-            return confess sprintf "Error creating work copy: %s\n", $error;
+            return confess sprintf "Error creating work copy: %s\n", _trim($error);
         }
     }
     $self->{params}->{mutex}->lock if $self->{params}->{mutex} && !$self->{params}->{commit_lock};
@@ -165,7 +172,7 @@ sub run
     if ($error) {
         $self->{params}->{mutex}->unlock if $self->{params}->{mutex} && !$self->{params}->{commit_lock};
         $self->_delete_works;
-        return confess sprintf "Error executing task: %s\n", $error;
+        return confess sprintf "Error executing task: %s\n", _trim($error);
     }
 
 =for comment
@@ -180,7 +187,7 @@ sub run
             if ($error) {
                 $self->_rollback($_);
                 $self->{params}->{mutex}->unlock if $self->{params}->{mutex};
-                return confess sprintf "Error creating backup copy: %s\n", $error;
+                return confess sprintf "Error creating backup copy: %s\n", _trim($error);
             }
 
             $error = $rs->commit;
@@ -192,7 +199,7 @@ sub run
             if ($error) {
                 $self->_rollback($_);
                 $self->{params}->{mutex}->unlock if $self->{params}->{mutex};
-                return confess sprintf "Error commit changes: %s\n", $error;
+                return confess sprintf "Error commit changes: %s\n", _trim($error);
             }
         }
     }
