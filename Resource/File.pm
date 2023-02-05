@@ -1,8 +1,7 @@
 package Resource::File;
 
 # ------------------------------------------------------------------------------
-use strict;
-use warnings;
+use Modern::Perl;
 
 use Carp;
 use English qw/-no_match_vars/;
