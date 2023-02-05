@@ -57,7 +57,7 @@ sub create_backup_copy
         path( $self->{params}->{source} )->copy( $self->{backup} );
     }
     catch {
-        return sprintf 'BACKUP file (%s)', $_;
+        return $_;
     };
     return;
 }
@@ -81,7 +81,7 @@ sub create_work_copy
         path( $self->{params}->{source} )->copy( $self->{work} );
     }
     catch {
-        return sprintf 'WORK file (%s)', $_;
+        return $_;
     };
     return;
 }
@@ -106,7 +106,7 @@ sub commit
             $self->{work}->move( $self->{params}->{source} );
         }
         catch {
-            return sprintf 'rename "%s" to "%s": %s', $self->{work}, $self->{params}->{source}, $_;
+            return sprintf 'file "%s": %s', $self->{params}->{source}, $_;
         }
         delete $self->{work};
     }
@@ -122,7 +122,7 @@ sub rollback
             $self->{backup}->move( $self->{params}->{source} );
         }
         catch {
-            return sprintf 'rename "%s" to "%s": %s', $self->{backup}, $self->{params}->{source}, $_;
+            return sprintf 'file "%s": %s', $self->{params}->{source}, $_;
         }
         delete $self->{backup};
     }

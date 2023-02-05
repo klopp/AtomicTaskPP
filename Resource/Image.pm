@@ -1,10 +1,10 @@
-package Resource::MemFile;
+package Resource::Image;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
 use Carp;
-use Path::Tiny;
+use Imager;
 use Try::Tiny;
 
 use lib q{..};
@@ -22,13 +22,12 @@ sub new
         {source} имя исходного файла
     В {params} МОЖЕТ быть:
         {id}
-        {encoding} кодировка 
     Структура после полной инициализации:
         {id}
         {params}
         {modified} 
-        {work}      буфер с рабочим файлом
-        {backup}    буфер с копией исходного файла
+        {work}      рабочий объект Imager
+        {backup}    объект Imager с копией исходной картинки
 =cut    
 
     my ( $class, $params ) = @_;
@@ -46,14 +45,8 @@ sub create_backup_copy
 {
     my ($self) = @_;
 
-    try {
-        my $encoding = ':raw';
-        $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
-        $self->{backup} = path( $self->{params}->{source} )->slurp( { binmode => $encoding } );
-    }
-    catch {
-        return $_;
-    };
+    $self->{backup} = Imager->new( file => $self->{params}->{source} )
+        or return Imager->errstr();
     return;
 }
 
@@ -70,14 +63,8 @@ sub create_work_copy
 {
     my ($self) = @_;
 
-    try {
-        my $encoding = ':raw';
-        $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
-        $self->{work} = path( $self->{params}->{source} )->slurp( { binmode => $encoding } );
-    }
-    catch {
-        return $_;
-    };
+    $self->{work} = Imager->new( file => $self->{params}->{source} )
+        or return Imager->errstr();
     return;
 }
 
@@ -93,15 +80,10 @@ sub delete_work_copy
 sub commit
 {
     my ($self) = @_;
-    try {
-        my $encoding = ':raw';
-        $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
-        path( $self->{params}->{source} )->spew( { binmode => $encoding }, $self->{work} );
-        delete $self->{work};
+    if ( $self->{work} ) {
+        $self->{work}->write( file => $self->{params}->{source} )
+            or return sprintf 'image "%s" (%s)', $self->{params}->{source}, $self->{work}->errstr;
     }
-    catch {
-        return sprintf 'file "%s" (%s)', $self->{params}->{source}, $_
-    };
     return;
 }
 
@@ -110,15 +92,9 @@ sub rollback
 {
     my ($self) = @_;
     if ( $self->{backup} ) {
-        try {
-            my $encoding = ':raw';
-            $self->{params}->{encoding} and $encoding .= sprintf ':encoding(%s)', $self->{params}->{encoding};
-            path( $self->{params}->{source} )->spew( { binmode => $encoding }, $self->{backup} );
-            delete $self->{backup};
-        }
-        catch {
-            return sprintf 'file "%s" (%s)', $self->{params}->{source}, $_;
-        };
+        $self->{backup}->write( file => $self->{params}->{source} )
+            or return sprintf 'image "%s" (%s)', $self->{params}->{source},
+            $self->{backup}->errstr;
     }
     return;
 }
