@@ -5,7 +5,6 @@ use Modern::Perl;
 use utf8::all;
 use open qw/:std :utf8/;
 
-use Carp;
 use Path::Tiny;
 use Try::Tiny;
 

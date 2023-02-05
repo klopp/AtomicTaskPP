@@ -3,7 +3,6 @@ package Resource::Imager;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use Carp;
 use Imager;
 use Try::Tiny;
 
