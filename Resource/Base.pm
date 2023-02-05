@@ -8,6 +8,8 @@ use Time::HiRes qw/gettimeofday/;
 
 our $VERSION = 'v1.0';
 
+our %RESOURCES;
+
 # ------------------------------------------------------------------------------
 sub new
 {
@@ -46,10 +48,12 @@ sub new
         id       => $params->{id},
     );
     $data{id} or $data{id} = join q{.}, ( gettimeofday() );
+    exists $RESOURCES{ $data{id} } and confess sprintf 'Error: resource ID "%s" already exists!', $data{id};
 
     my $self  = bless \%data, $class;
     my $error = $self->check_params;
     $error and confess sprintf 'Error: invalid parameters: %s', $error;
+    $RESOURCES{ $self->{id} } = $self;
     return $self;
 }
 
@@ -63,7 +67,7 @@ sub id
 # ------------------------------------------------------------------------------
 sub modified
 {
-    my ($self, $value) = @_;
+    my ( $self, $value ) = @_;
     $value and $self->{modified} = $value;
     return $self->{modified};
 }
