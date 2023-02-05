@@ -32,6 +32,8 @@ sub new
 
     my ( $class, $params ) = @_;
     my $self = $class->SUPER::new($params);
+    # output in SCALAR only:
+    delete $self->{params}->{xml}->{output};
     return $self;
 }
 

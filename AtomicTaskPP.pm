@@ -23,9 +23,9 @@ our %TASKS;
     * Заменяет ресурсы изменёнными рабочими копиями если ошибок не случилось (commit)
     * В случае ошибок на этапе коммита откатывает затронутые ресурсы на 
         резервные копии
-    
+
     Схема использования:
-    
+
         # Файл отмапленный в память:
         use Resource::MemFile;
         my $rfm = Resource::MemFile->new( { source => '/my/data/table.xyz', id => 'memfile', }, );
@@ -34,27 +34,30 @@ our %TASKS;
         use Resource::Data;
         my $data = { ... };
         my $rd = Resource::Data->new( { source => \$data, id => 'data', }, );
-         
-        my $task = MyTask->new( [ $rfm, $rd ], { mutex => Mutex->new, }, );
+
+        my $task = MyTask->new( [ $rfm, $rd, ], { mutex => Mutex->new, }, );
         $task->run;
         exit;
 
+        package MyTask;
         use AtomicTaskPP;
         use base qw/AtomicTaskPP/;
-        
+
         sub execute
         {
             my ($self) = @_;
-            
+
             my $memfile = $self->rget( 'memfile' );
             my $data    = $self->rget( 'data' );
             #
             # Что здесь доступно для каждого типа ресурсов
             #   описано в соответствующих исходниках.
             #   Основное (а другого и не нужно):
-            #       $data->{work} (копия данных)
+            #
+            #       что-то делаем с данными: $data->{work}
             #       $data->{modified} = 1; (если менялось)
-            #       $memfile->{work} (содержимое файла)
+            #
+            #       что-то делаем с содержимым файла в памяти: $memfile->{work}
             #       $memfile->{modified} = 1; (если менялось)
             #            
             return;
