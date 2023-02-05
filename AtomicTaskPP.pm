@@ -35,10 +35,11 @@ our %TASKS;
         my $data = { ... };
         my $rd = Resource::Data->new( { source => \$data, id => 'data', }, );
          
-        my $task = MyTask->new( [ $rfm, $rd ], { mutex => Mutex->new, }, );
+        my $task = MyTask->new( [ $rfm, $rd, ], { mutex => Mutex->new, }, );
         $task->run;
         exit;
 
+        package MyTask;
         use AtomicTaskPP;
         use base qw/AtomicTaskPP/;
         
@@ -52,9 +53,11 @@ our %TASKS;
             # Что здесь доступно для каждого типа ресурсов
             #   описано в соответствующих исходниках.
             #   Основное (а другого и не нужно):
-            #       $data->{work} (копия данных)
+            #
+            #       что-то делаем с данными: $data->{work}
             #       $data->{modified} = 1; (если менялось)
-            #       $memfile->{work} (содержимое файла)
+            #
+            #       что-то делаем с содержимым файла в памяти: $memfile->{work}
             #       $memfile->{modified} = 1; (если менялось)
             #            
             return;
