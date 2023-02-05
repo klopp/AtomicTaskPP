@@ -48,7 +48,7 @@ sub create_work_copy
         $self->{work} = xml2hash( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        $error = sprintf 'XML: %s', $_;
+        $error = sprintf 'XmlFile :: %s', $_;
     };
     return $error;
 }
@@ -63,7 +63,7 @@ sub commit
         $self->{work} and $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        $error = sprintf 'XML: %s', $_;
+        $error = sprintf 'XmlFile :: %s', $_;
     };
     return $error ? $error : $self->SUPER::commit;
 }

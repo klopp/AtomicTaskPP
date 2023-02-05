@@ -57,7 +57,7 @@ sub create_work_copy
         $self->{work} = $self->{json}->decode( $self->{work} );
     }
     catch {
-        $error = sprintf 'JSON: %s', $_;
+        $error = sprintf 'JSON :: %s', $_;
     };
     return $error;
 }
@@ -72,7 +72,7 @@ sub commit
         $self->{work} and $self->{work} = $self->{json}->encode( $self->{work} );
     }
     catch {
-        $error = sprintf 'JSON: %s', $_;
+        $error = sprintf 'JSON :: %s', $_;
     };
     return $error ? $error : $self->SUPER::commit;
 }

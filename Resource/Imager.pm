@@ -39,7 +39,7 @@ sub create_backup_copy
     my ($self) = @_;
 
     $self->{backup} = Imager->new( file => $self->{params}->{source} )
-        or return Imager->errstr();
+        or return sprintf 'Imager :: %s', Imager->errstr();
     return;
 }
 
@@ -57,7 +57,7 @@ sub create_work_copy
     my ($self) = @_;
 
     $self->{work} = Imager->new( file => $self->{params}->{source} )
-        or return Imager->errstr();
+        or return sprintf 'Imager :: %s', Imager->errstr();
     return;
 }
 
@@ -75,7 +75,7 @@ sub commit
     my ($self) = @_;
     if ( $self->{work} ) {
         $self->{work}->write( file => $self->{params}->{source} )
-            or return sprintf 'image "%s" (%s)', $self->{params}->{source}, $self->{work}->errstr;
+            or return sprintf 'Imager :: "%s" (%s)', $self->{params}->{source}, $self->{work}->errstr;
     }
     return;
 }
@@ -86,7 +86,7 @@ sub rollback
     my ($self) = @_;
     if ( $self->{backup} ) {
         $self->{backup}->write( file => $self->{params}->{source} )
-            or return sprintf 'image "%s" (%s)', $self->{params}->{source},
+            or return sprintf 'Imager :: "%s" (%s)', $self->{params}->{source},
             $self->{backup}->errstr;
     }
     return;
