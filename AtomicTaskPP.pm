@@ -10,6 +10,7 @@ use lib q{.};
 use Resource::Base;
 
 our $VERSION = 'v1.0';
+our %TASKS;
 
 # ------------------------------------------------------------------------------
 
@@ -60,8 +61,6 @@ our $VERSION = 'v1.0';
         }       
 =cut
 
-our %TASKS;
-
 # ------------------------------------------------------------------------------
 sub new
 {
@@ -105,6 +104,7 @@ sub new
     exists $TASKS{ $data{id} } and confess sprintf 'Error: task ID "%s" already exists!', $data{id};
 
     my $self = bless \%data, $class;
+    %{ $self->{_res} } = map { $_->{id} => $_ } @{$resources};
     $TASKS{ $self->{id} } = $self;
     return $self;
 }
@@ -117,16 +117,16 @@ sub id
 }
 
 # ------------------------------------------------------------------------------
-sub getr
+sub rget
 {
     my ( $self, $id ) = @_;
-    return $Resource::Base::RESOURCES{$id};
+    return $self->{_res}->{$id};
 }
 
 # ------------------------------------------------------------------------------
 sub run
 {
-    my ( $self ) = @_;
+    my ($self) = @_;
 
     my $error;
     for ( 0 .. @{ $self->{resources} } - 1 ) {
