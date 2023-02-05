@@ -52,7 +52,7 @@ sub create_backup_copy
         $self->{backup} = path( $self->{params}->{source} )->slurp( { binmode => $encoding } );
     }
     catch {
-        return sprintf 'create BACKUP file (%s)', $_;
+        return $_;
     };
     return;
 }
@@ -76,7 +76,7 @@ sub create_work_copy
         $self->{work} = path( $self->{params}->{source} )->slurp( { binmode => $encoding } );
     }
     catch {
-        return sprintf 'create WORK file (%s)', $_;
+        return $_;
     };
     return;
 }
@@ -100,7 +100,7 @@ sub commit
         delete $self->{work};
     }
     catch {
-        return sprintf 'overwrite source file "%s" (%s)', $self->{params}->{source}, $_
+        return sprintf 'file "%s" (%s)', $self->{params}->{source}, $_
     };
     return;
 }
@@ -117,7 +117,7 @@ sub rollback
             delete $self->{backup};
         }
         catch {
-            return sprintf 'overwrite source file "%s" (%s)', $self->{params}->{source}, $_;
+            return sprintf 'file "%s" (%s)', $self->{params}->{source}, $_;
         };
     }
     return;
