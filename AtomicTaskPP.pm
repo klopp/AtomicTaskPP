@@ -100,6 +100,7 @@ sub new
         params    => $params,
         id        => $params->{id},
     );
+    delete $data{params}->{id};
     $data{id} or $data{id} = join q{.}, ( gettimeofday() );
     exists $TASKS{ $data{id} } and confess sprintf 'Error: task ID "%s" already exists!', $data{id};
 
