@@ -47,6 +47,7 @@ sub new
         work     => undef,
         id       => $params->{id},
     );
+    delete $data{params}->{id};
     $data{id} or $data{id} = join q{.}, ( gettimeofday() );
     exists $RESOURCES{ $data{id} } and confess sprintf 'Error: resource ID "%s" already exists!', $data{id};
 

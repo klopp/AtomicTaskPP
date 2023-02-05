@@ -1,14 +1,14 @@
-package Resource::JSON;
+package Resource::XmlFile;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use JSON::XS;
 use Try::Tiny;
+use XML::Hash::XS;
 
 use lib q{..};
-use Resource::Data;
-use base qw/Resource::Data/;
+use Resource::MemFile;
+use base qw/Resource::MemFile/;
 
 our $VERSION = 'v1.0';
 
@@ -18,19 +18,21 @@ sub new
 
 =for comment
     В {params} ДОЛЖНО быть:
-        {source} ссылка на скаляр с JSON
+        {source} имя исходного файла
     В {params} МОЖЕТ быть:
+        {encoding} кодировка 
         {id}
     Структура после полной инициализации:
         {id}
         {params}
-        {modified} 
+        {modified}
         {work}      рабочие данные
         {backup}    копия исходных данных
 =cut    
 
     my ( $class, $params ) = @_;
-    return $class->SUPER::new($params);
+    my $self = $class->SUPER::new($params);
+    return $self;
 }
 
 # ------------------------------------------------------------------------------
@@ -41,10 +43,10 @@ sub create_work_copy
     $error and return $error;
 
     try {
-        $self->{work} = decode_json( $self->{work} );
+        $self->{work} = xml2hash( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        $error = sprintf 'JSON: %s', $_;
+        $error = sprintf 'XML: %s', $_;
     };
     return $error;
 }
@@ -54,10 +56,10 @@ sub commit
 {
     my ($self) = @_;
     try {
-        $self->{work} and $self->{work} = encode_json( $self->{work} );
+        $self->{work} and $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        return sprintf 'JSON: %s', $_;
+        return sprintf 'XML: %s', $_;
     };
     return $self->SUPER::commit;
 }
