@@ -43,14 +43,15 @@ sub create_backup_copy
 {
     my ($self) = @_;
 
+    my $error;
     try {
         $self->{backup} = Path::Tiny->tempfile( DIR => $self->{tempdir} );
         path( $self->{params}->{source} )->copy( $self->{backup} );
     }
     catch {
-        return $_;
+        $error = $_;
     };
-    return;
+    return $error;
 }
 
 # ------------------------------------------------------------------------------
@@ -67,14 +68,15 @@ sub create_work_copy
 {
     my ($self) = @_;
 
+    my $error;
     try {
         $self->{work} = Path::Tiny->tempfile( DIR => $self->{tempdir} );
         path( $self->{params}->{source} )->copy( $self->{work} );
     }
     catch {
-        return $_;
+        $error = $_;
     };
-    return;
+    return $error;
 }
 
 # ------------------------------------------------------------------------------
@@ -90,26 +92,30 @@ sub delete_work_copy
 sub commit
 {
     my ($self) = @_;
+    
+    my $error;
     try {
         $self->{work} and $self->{work}->move( $self->{params}->{source} );
     }
     catch {
-        return sprintf 'file "%s": %s', $self->{params}->{source}, $_;
+        $error = sprintf 'file "%s": %s', $self->{params}->{source}, $_;
     }
-    return;
+    return $error;
 }
 
 # ------------------------------------------------------------------------------
 sub rollback
 {
     my ($self) = @_;
+
+    my $error;
     try {
         $self->{backup} and $self->{backup}->move( $self->{params}->{source} );
     }
     catch {
-        return sprintf 'file "%s": %s', $self->{params}->{source}, $_;
+        $error = sprintf 'file "%s": %s', $self->{params}->{source}, $_;
     }
-    return;
+    return $error;
 }
 
 # ------------------------------------------------------------------------------

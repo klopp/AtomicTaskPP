@@ -53,13 +53,15 @@ sub create_work_copy
 sub commit
 {
     my ($self) = @_;
+
+    my $error;
     try {
         $self->{work} and $self->{work} = encode_json( $self->{work} );
     }
     catch {
-        return sprintf 'JSON: %s', $_;
+        $error = sprintf 'JSON: %s', $_;
     };
-    return $self->SUPER::commit;
+    return $error ? $error : $self->SUPER::commit;
 }
 
 # ------------------------------------------------------------------------------
