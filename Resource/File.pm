@@ -3,8 +3,6 @@ package Resource::File;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use Carp;
-use English qw/-no_match_vars/;
 use Path::Tiny;
 use Try::Tiny;
 
