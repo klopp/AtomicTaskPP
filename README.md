@@ -2,7 +2,7 @@
 
 * [Базовый класс](#AtomicTaskPP)
 * [Создание атомарной задачи](#AtomicTaskPP_Create)
-* [Resources](#Resources)
+* [Ресурсы](#Resources)
     * [Resource::Data](#Resource_Data)
     * [Resource::JSON](#Resource_JSON)
     * [Resource::BSON](#Resource_BSON)
@@ -11,6 +11,7 @@
     * [Resource::MemFile](#Resource_MemFile)
     * [Resource::XmlFile](#Resource_XmlFile)
     * [Resource::Imager](#Resource_Imager)
+* [Создание своего ресурса](#Resource_Create)
 
 <a name="AtomicTaskPP"></a>
 
@@ -218,7 +219,12 @@
 
 ```perl
     use Resource::Imager;
-    my $r_img = Resource::Imager->new( { source => './data/hello.jpg' );
+    my $r_img = Resource::Imager->new( { source => './data/hello.jpg' } );
 ```
 
 `AtomicTaskPP::wget()` возвращает объект [Imager](https://metacpan.org/pod/Imager).
+
+<a name="Resource_Create"></a>
+
+## Создание своего ресурса
+
