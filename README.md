@@ -4,6 +4,13 @@
 * [Создание атомарной задачи](#AtomicTaskPP_Create)
 * [Resources](#Resources)
     * [Resource::Data](#Resource_Data)
+    * [Resource::JSON](#Resource_JSON)
+    * [Resource::BSON](#Resource_BSON)
+    * [Resource::XML](#Resource_XML)
+    * [Resource::File](#Resource_File)
+    * [Resource::MemFile](#Resource_MemFile)
+    * [Resource::XmlFile](#Resource_XmlFile)
+    * [Resource::Imager](#Resource_Imager)
 
 <a name="AtomicTaskPP"></a>
 
@@ -128,6 +135,7 @@
 
 `AtomicTaskPP::wget()` возвращает копию исходной структуры данных.
 
+<a name="Resource_JSON"></a>
 
 ### [Resource::JSON](Resource/JSON.pm)
 
@@ -142,6 +150,7 @@
 
 `AtomicTaskPP::wget()` возвращает хэш с результатами разбора JSON.
 
+<a name="Resource_BSON"></a>
 
 ### [Resource::BSON](Resource/BSON.pm)
 
@@ -156,6 +165,8 @@
 
 `AtomicTaskPP::wget()` возвращает хэш с результатами разбора BSON.
 
+<a name="Resource_XML"></a>
+
 ### [Resource::XML](Resource/XML.pm)
 
 Скаляр с XMP. Дополнительно могут быть указаны методы для управления парсером, см. 
@@ -169,6 +180,7 @@
 
 `AtomicTaskPP::wget()` возвращает хэш с результатами разбора XML.
 
+<a name="Resource_File"></a>
 
 ### [Resource::File](Resource/File.pm)
 
@@ -181,9 +193,13 @@
 
 `AtomicTaskPP::wget()` возвращает объект [Path::Tiny](https://metacpan.org/pod/Path::Tiny).
 
+<a name="Resource_MemFile"></a>
+
 ### [Resource::MemFile](Resource/MemFile.pm)
 
 То же самое, но `AtomicTaskPP::wget()` возвращает буфер в памяти с содержимым исходного файла.
+
+<a name="Resource_XmlFile"></a>
 
 ### [Resource::XmlFile](Resource/XmlFile.pm)
 
@@ -193,6 +209,8 @@
     use Resource::XmlFile;
     my $r_xmlfile = Resource::XmlFile->new( { source => './data/hello.xml', xml => { keep_root => 1 } } );
 ```
+
+<a name="Resource_Imager"></a>
 
 ### [Resource::Imager](Resource/Imager.pm)
 
