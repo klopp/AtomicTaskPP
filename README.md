@@ -112,7 +112,7 @@
     my $r_data = Resource::Data->new( { source => \$data } );
 ```
 
-`[AtomicTaskPP](AtomicTaskPP.pm)::wget()` возвращает копию исходной структуры данных.
+`AtomicTaskPP::wget()` возвращает копию исходной структуры данных.
 
 
 ### [Resource::JSON](Resource/JSON.pm)
@@ -126,7 +126,7 @@
     my $r_json = Resource::JSON->new( { source => \$json, json => { pretty => 1 } } );
 ```
 
-`[AtomicTaskPP](AtomicTaskPP.pm)::wget()` возвращает хэш с результатами разбора JSON.
+`AtomicTaskPP::wget()` возвращает хэш с результатами разбора JSON.
 
 
 ### [Resource::BSON](Resource/BSON.pm)
@@ -140,7 +140,7 @@
     my $r_bson = Resource::BSON->new( { source => \$bson, bson => { prefer_numeric => 1 } } );
 ```
 
-`[AtomicTaskPP](AtomicTaskPP.pm)::wget()` возвращает хэш с результатами разбора BSON.
+`AtomicTaskPP::wget()` возвращает хэш с результатами разбора BSON.
 
 ### [Resource::XML](Resource/XML.pm)
 
@@ -153,7 +153,7 @@
     my $r_xml = Resource::XML->new( { source => \$xml, xml => { indent => 2 } } );
 ```
 
-`[AtomicTaskPP](AtomicTaskPP.pm)::wget()` возвращает хэш с результатами разбора XML.
+`AtomicTaskPP::wget()` возвращает хэш с результатами разбора XML.
 
 
 ### [Resource::File](Resource/File.pm)
@@ -165,11 +165,11 @@
     my $r_file = Resource::File->new( { source => './data/hello.txt' } );
 ```
 
-`[AtomicTaskPP](AtomicTaskPP.pm)::wget()` возвращает объект [Path::Tiny](https://metacpan.org/pod/Path::Tiny).
+`AtomicTaskPP::wget()` возвращает объект [Path::Tiny](https://metacpan.org/pod/Path::Tiny).
 
 ### [Resource::MemFile](Resource/MemFile.pm)
 
-То же самое, но `[AtomicTaskPP](AtomicTaskPP.pm)::wget()` возвращает буфер в памяти с содержимым исходного файла.
+То же самое, но `AtomicTaskPP::wget()` возвращает буфер в памяти с содержимым исходного файла.
 
 ### [Resource::XmlFile](Resource/XmlFile.pm)
 
@@ -189,4 +189,4 @@
     my $r_img = Resource::Imager->new( { source => './data/hello.jpg' );
 ```
 
-`[AtomicTaskPP](AtomicTaskPP.pm)::wget()` возвращает объект [Imager](https://metacpan.org/pod/Imager).
+`AtomicTaskPP::wget()` возвращает объект [Imager](https://metacpan.org/pod/Imager).
