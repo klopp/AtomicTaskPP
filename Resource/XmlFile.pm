@@ -20,8 +20,10 @@ sub new
     В {params} ДОЛЖНО быть:
         {source} имя исходного файла
     В {params} МОЖЕТ быть:
-        {encoding} кодировка 
+        {quiet}    не выводить предупреждения
+        {encoding} кодировка файла
         {id}
+        {xml}      флаги XML::Hash::XS
     Структура после полной инициализации:
         {id}
         {params}
@@ -32,6 +34,7 @@ sub new
 
     my ( $class, $params ) = @_;
     my $self = $class->SUPER::new($params);
+
     # output in SCALAR only:
     delete $self->{params}->{xml}->{output};
     return $self;

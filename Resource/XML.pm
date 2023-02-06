@@ -11,7 +11,6 @@ use Resource::Data;
 use base qw/Resource::Data/;
 
 our $VERSION = 'v1.0';
-
 # ------------------------------------------------------------------------------
 sub new
 {
@@ -20,8 +19,9 @@ sub new
     В {params} ДОЛЖНО быть:
         {source} ссылка на скаляр с JSON
     В {params} МОЖЕТ быть:
+        {quiet} не выводить предупреждения
         {id}
-        {xml} флаги XML::Hash::XS
+        {xml}   флаги XML::Hash::XS
     Структура после полной инициализации:
         {id}
         {params}
@@ -59,7 +59,7 @@ sub create_work_copy
 sub commit
 {
     my ($self) = @_;
-    
+
     my $error;
     try {
         $self->{work} and $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );

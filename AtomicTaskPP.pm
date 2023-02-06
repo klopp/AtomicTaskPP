@@ -69,7 +69,7 @@ sub _trim
 {
     @_ = @_ ? @_ : $_ if defined wantarray;
     s/^\s+|\s+$//g for @_ ? @_ : $_;
-    wantarray             ? @_ : shift;
+    return wantarray      ? @_ : shift;
 }
 
 # ------------------------------------------------------------------------------

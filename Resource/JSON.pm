@@ -3,7 +3,7 @@ package Resource::JSON;
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use Carp qw/confess/;
+use Carp qw/confess cluck/;
 use JSON::XS;
 use Try::Tiny;
 
@@ -21,8 +21,9 @@ sub new
     В {params} ДОЛЖНО быть:
         {source} ссылка на скаляр с JSON
     В {params} МОЖЕТ быть:
+        {quiet} не выводить предупреждения
         {id}
-        {json} список методов для инициализации JSON::XS в формате { метод=>зачение, ...}
+        {json}  список методов для инициализации JSON::XS в формате { метод=>зачение, ...}
     Структура после полной инициализации:
         {id}
         {params}
@@ -37,7 +38,13 @@ sub new
     $self->{json} = JSON::XS->new;
     try {
         while ( my ( $method, $value ) = each %{ $self->{params}->{json} } ) {
-            $self->{json}->$method($value);
+            if ( $self->{json}->can($method) ) {
+                $self->{json}->$method($value);
+            }
+            else {
+                $params->{quiet}
+                    or cluck sprintf 'JSON :: %s() is not defined in JSON!', $method;
+            }
         }
     }
     catch {

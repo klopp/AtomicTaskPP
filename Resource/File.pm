@@ -20,6 +20,7 @@ sub new
     В {params} ДОЛЖНО быть:
         {source} имя исходного файла
     В {params} МОЖЕТ быть:
+        {quiet}   не выводить предупреждения
         {tempdir}
         {id}
     Структура после полной инициализации:
@@ -92,7 +93,7 @@ sub delete_work_copy
 sub commit
 {
     my ($self) = @_;
-    
+
     my $error;
     try {
         $self->{work} and $self->{work}->move( $self->{params}->{source} );
