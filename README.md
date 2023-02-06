@@ -26,17 +26,15 @@
     sub new 
     {
         my ( $class, $resources, $params ) = @_;
-        =for comment
-            $resources => [ 
-                Resource::*, ... 
-            ]
-            $params = {
-                id          => SCALAR, # ID задачи, при отсутствии будет сгенерирован
-                quiet       => bool,   # выводить предупреждения или нет
-                mutex       => OBJECT, # должен уметь ->lock() и ->unlock()
-                commit_lock => bool,   # блокировать всё исполнение или только коммит
-            }
-        =cut
+        #   $resources => [ 
+        #       Resource::*, ... 
+        #   ]
+        #   $params = {
+        #       id          => SCALAR, # ID задачи, при отсутствии будет сгенерирован
+        #       quiet       => bool,   # выводить предупреждения или нет
+        #       mutex       => OBJECT, # должен уметь ->lock() и ->unlock()
+        #       commit_lock => bool,   # блокировать всё исполнение или только коммит
+        #   }
         # ...
     }
 ```
@@ -62,29 +60,25 @@
     sub execute
     {
         my ($self) = @_;
-        =for comment
-            Здесь доступны:
-                my @resources = @{ $self->{resources} };
-                my %params    = @{ $self->{params} };
-                my $id        = $self->{id};
-            На практике достаточно:
-        =cut
-            my $id       = $self->id();
-            # получить ресурс:
-            my $resource = $self->rget('RESOURCE_ID');
-            # получить рабочую копию данных ресурса:
-            my $work     = $self->wget('RESOURCE_ID');
-            # или
-            $work = $resource->{work};
-        =for comment
-            Здесь делаем с делаем с рабочими копиями ресурсов что хотим.
-            В случае ошибок вернуть сообщение:
+        #   Здесь доступны:
+        #       my @resources = @{ $self->{resources} };
+        #       my %params    = @{ $self->{params} };
+        #       my $id        = $self->{id};
+        #   На практике достаточно:
+                my $id       = $self->id();
+        #   Получить ресурс:
+                my $resource = $self->rget('RESOURCE_ID');
+        #   Получить рабочую копию данных ресурса:
+                my $work     = $self->wget('RESOURCE_ID');
+        #   или
+                $work = $resource->{work};
+        #   Здесь делаем с делаем с рабочими копиями ресурсов что хотим.
+        #   В случае ошибок вернуть сообщение:
                 return 'Усё пропало, шеф!';
-            Или ничего (всё хорошо).
-            Если были изменения - обязательно выставить флаг модификации
-        =cut
-            $resource->modified(1);
-            return;
+        #   Или ничего (всё хорошо).
+        #   Если были изменения - обязательно выставить флаг модификации
+                $resource->modified(1);
+                return;
     }
 
     use Mutex;
@@ -102,15 +96,13 @@
     sub new
     {
         my ($self, $params ) = @_;
-        =for comment
-            $params = {
-                id     => SCALAR,     # ID, при отсутствии будет сгенерирован
-                quiet  => bool,       # выводить предупреждения или нет
-                SOURCE => VALUE,      # ОБЯЗАТЕЛЬНЫЙ аргумент, значение
-                                      # зависит от типа ресурса
-                # ... дополнительные данные
-            }
-        =cut
+        #   $params = {
+        #       id     => SCALAR,     # ID, при отсутствии будет сгенерирован
+        #       quiet  => bool,       # выводить предупреждения или нет
+        #       SOURCE => VALUE,      # ОБЯЗАТЕЛЬНЫЙ аргумент, значение
+        #                             # зависит от типа ресурса
+        #       # ... дополнительные данные
+        #   }
     }
 ```
 
