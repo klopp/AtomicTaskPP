@@ -1,12 +1,13 @@
 # Реализация атомарной обработки данных
 
-1. [Базовый класс](#AtomicTaskPP)
-2. [Создание атомарной задачи](#AtomicTaskPP_Create)
-3. [Resources](#Resources)
-
-## Базовый класс 
+* [Базовый класс](#AtomicTaskPP)
+* [Создание атомарной задачи](#AtomicTaskPP_Create)
+* [Resources](#Resources)
+    * [Resource::Data](#Resource_Data)
 
 <a name="AtomicTaskPP"></a>
+
+## Базовый класс 
 
 [AtomicTaskPP](AtomicTaskPP.pm)
 
@@ -38,9 +39,9 @@
 * в случае успешного его завершения замещает исходные ресурсы модифицированными копиями (`commit`)
 * при ошибках замещения возвращает изменённые ресурсы на место (`rollback`)
 
-## Создание атомарной задачи
-
 <a name="AtomicTaskPP_Create"></a>
+
+## Создание атомарной задачи
 
 Необхдимо унаследоваться от [AtomicTaskPP](AtomicTaskPP.pm) и перегрузить метод `execute()`:
 
@@ -81,9 +82,9 @@
     my $task = ATask->new( [$xml_file], { mutex => Mutex->new, quiet => 1 } );
 ```
 
-## Ресурсы
-
 <a name="Resources"></a>
+
+## Ресурсы
 
 Наследуются от абстрактного класса [Resource::Base](Resource/Base.pm). 
 Конструктор принимает ссылку на хэш с параметрами:
@@ -110,6 +111,8 @@
     use Resource::XmlFile;
     my $xml_file = Resource::XmlFile->new( { source => '../data/test.xml' } );
 ```
+
+<a name="Resource_Data"></a>
 
 ### [Resource::Data](Resource/Data.pm)
 
