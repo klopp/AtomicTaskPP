@@ -4,7 +4,9 @@
 2. [Создание атомарной задачи](#AtomicTaskPP_Create)
 3. [Resources](#Resources)
 
-## Базовый класс {#AtomicTaskPP}
+## Базовый класс 
+
+<a name="AtomicTaskPP"></a>
 
 [AtomicTaskPP](AtomicTaskPP.pm)
 
@@ -36,7 +38,9 @@
 * в случае успешного его завершения замещает исходные ресурсы модифицированными копиями (`commit`)
 * при ошибках замещения возвращает изменённые ресурсы на место (`rollback`)
 
-## Создание атомарной задачи {#AtomicTaskPP_Create}
+## Создание атомарной задачи
+
+<a name="AtomicTaskPP_Create"></a>
 
 Необхдимо унаследоваться от [AtomicTaskPP](AtomicTaskPP.pm) и перегрузить метод `execute()`:
 
@@ -77,7 +81,9 @@
     my $task = ATask->new( [$xml_file], { mutex => Mutex->new, quiet => 1 } );
 ```
 
-## Ресурсы {#Resources}
+## Ресурсы
+
+<a name="Resources"></a>
 
 Наследуются от абстрактного класса [Resource::Base](Resource/Base.pm). 
 Конструктор принимает ссылку на хэш с параметрами:
