@@ -59,13 +59,11 @@
             # или
             $work = $resource->{work};
         =for comment
-            Здесь делаем с делаем с рабочими копиями ресурсов
-            что хотим.
+            Здесь делаем с делаем с рабочими копиями ресурсов что хотим.
             В случае ошибок вернуть сообщение:
                 return 'Усё пропало, шеф!';
             Или ничего (всё хорошо).
-            Если были изменения - обязательно
-            выставить флаг модификации
+            Если были изменения - обязательно выставить флаг модификации
         =cut
             $resource->modified(1);
             return;
@@ -179,9 +177,16 @@
 
 ```perl
     use Resource::XmlFile;
-    my $r_xmlfile = Resource::XmlFile->new( { source => './data/hello.xml' } );
+    my $r_xmlfile = Resource::XmlFile->new( { source => './data/hello.xml', xml => { keep_root => 1 } } );
 ```
 
 ### [Resource::Imager](Resource/Imager.pm)
 
+Картинка. Поддерживаются форматы `raw, sgi, bmp, pnm, ico, jpeg, tga, png, gif, tiff`.
 
+```perl
+    use Resource::Imager;
+    my $r_img = Resource::Imager->new( { source => './data/hello.jpg' );
+```
+
+`[AtomicTaskPP](AtomicTaskPP.pm)::wget()` возвращает объект [Imager](https://metacpan.org/pod/Imager).
