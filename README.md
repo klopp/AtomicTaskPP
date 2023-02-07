@@ -120,8 +120,7 @@ sub check_params
 
 ## Ресурсы
 
-Наследуются от абстрактного класса [Atomic::Resource::Base](Atomic/Resource/Base.pm). 
-Конструктор принимает ссылку на хэш с параметрами:
+Наследуются от абстрактного класса [Atomic::Resource::Base](Atomic/Resource/Base.pm). Конструктор принимает ссылку на хэш с параметрами:
 
 ```perl
     sub new
@@ -153,8 +152,7 @@ sub check_params
 
 ### [Atomic::Resource::Data](Atomic/Resource/Data.pm)
 
-Любая структура данных (SCALAR, HASH, ARRAY, OBJECT). В случае blessed-объекта для 
-корректного копирования в объекте должен быть (при необходимости) метод `clone()`.
+Любая структура данных (SCALAR, HASH, ARRAY, OBJECT). В случае blessed-объекта для корректного копирования в объекте должен быть (при необходимости) метод `clone()`.
 
 ```perl
     use Atomic::Resource::Data;
@@ -166,8 +164,7 @@ sub check_params
 
 ### [Atomic::Resource::JSON](Atomic/Resource/JSON.pm)
 
-Скаляр с JSON. Дополнительно могут быть указаны методы для управления парсером, см. 
-[JSON::XS#OBJECT-ORIENTED-INTERFACE](https://metacpan.org/pod/JSON::XS#OBJECT-ORIENTED-INTERFACE).
+Скаляр с JSON. Дополнительно могут быть указаны методы для управления парсером, см. [JSON::XS#OBJECT-ORIENTED-INTERFACE](https://metacpan.org/pod/JSON::XS#OBJECT-ORIENTED-INTERFACE).
 
 ```perl
     use Atomic::Resource::JSON;
@@ -179,8 +176,7 @@ sub check_params
 
 <a name="Resource_BSON"></a>
 
-Скаляр с BSON. Дополнительно могут быть указаны флаги для управления парсером, см. 
-[BSON#ATTRIBUTES](https://metacpan.org/pod/BSON#ATTRIBUTES).
+Скаляр с BSON. Дополнительно могут быть указаны флаги для управления парсером, см. [BSON#ATTRIBUTES](https://metacpan.org/pod/BSON#ATTRIBUTES).
 
 ```perl
     use Atomic::Resource::BSON;
@@ -192,8 +188,7 @@ sub check_params
 
 ### [Atomic::Resource::XML](Atomic/Resource/XML.pm)
 
-Скаляр с XMP. Дополнительно могут быть указаны методы для управления парсером, см. 
-[XML::Hash::XS#OPTIONS](https://metacpan.org/pod/XML::Hash::XS#OPTIONS).
+Скаляр с XMP. Дополнительно могут быть указаны методы для управления парсером, см. [XML::Hash::XS#OPTIONS](https://metacpan.org/pod/XML::Hash::XS#OPTIONS).
 
 ```perl
     use Atomic::Resource::XML;
