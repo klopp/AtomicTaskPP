@@ -120,8 +120,6 @@
 
 ### [Resource::Data](Resource/Data.pm)
 
-[Resource::Data](Resource/Data.pm)
-
 Любая структура данных (SCALAR, HASH, ARRAY, OBJECT). В случае blessed-объекта для 
 корректного копирования в объекте должен быть (при необходимости) метод `clone()`.
 
