@@ -4,7 +4,7 @@ package Resource::Data;
 use Modern::Perl;
 
 use Carp qw/cluck/;
-use Data::Clone qw/clone/;
+use Clone qw/clone/;
 use Scalar::Util qw/blessed/;
 
 use lib q{..};
