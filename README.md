@@ -1,17 +1,18 @@
 # Реализация атомарной обработки данных
 
 * [Базовый класс](#AtomicTaskPP)
-* [Создание атомарной задачи](#AtomicTaskPP_Create)
-* [Ресурсы](#Resources)
-    * [Resource::Data](#Resource_Data)
-    * [Resource::JSON](#Resource_JSON)
-    * [Resource::BSON](#Resource_BSON)
-    * [Resource::XML](#Resource_XML)
-    * [Resource::File](#Resource_File)
-    * [Resource::MemFile](#Resource_MemFile)
-    * [Resource::XmlFile](#Resource_XmlFile)
-    * [Resource::Imager](#Resource_Imager)
-* [Создание своего ресурса](#Resource_Create)
+* [Создание атомарной задачи](#создание-атомарной-задачи)
+* [Ресурсы](#ресурсы)
+    * [Resource::Data](#resourcedata)
+    * [Resource::JSON](#resourcejson)
+    * [Resource::BSON](#resourcebson)
+    * [Resource::XML](#resourcexml)
+    * [Resource::File](#resourcefile)
+    * [Resource::MemFile](#resourcememfile)
+    * [Resource::XmlFile](#resourcexmlfile)
+    * [Resource::Imager](#resourceimager)
+* [Создание ресурса](#создание-ресурса)
+    * [Перегружаемые методы](#перегружаемые-методы)
 
 <a name="AtomicTaskPP"></a>
 
@@ -45,8 +46,6 @@
 * вызывается метод `execute()` (должен быть перегружен в дочернем объекте)
 * в случае успешного его завершения замещает исходные ресурсы модифицированными копиями (`commit`)
 * при ошибках замещения возвращает изменённые ресурсы на место (`rollback`)
-
-<a name="AtomicTaskPP_Create"></a>
 
 ## Создание атомарной задачи
 
@@ -106,14 +105,19 @@
     }
 ```
 
-Например:
+В случае ошибок конструктор генерирует исключение. 
 
 ```perl
     use Resource::XmlFile;
-    my $xml_file = Resource::XmlFile->new( { source => '../data/test.xml' } );
+    use Try::Tiny;
+    my $xml_file;
+    try {
+        $xml_file = Resource::XmlFile->new( { source => '../data/test.xml' } );
+    }
+    catch {
+        say sprintf 'Error: %s', $_;
+    };
 ```
-
-<a name="Resource_Data"></a>
 
 ### [Resource::Data](Resource/Data.pm)
 
@@ -218,5 +222,73 @@
 
 <a name="Resource_Create"></a>
 
-## Создание своего ресурса
+## Создание ресурса
 
+Чтобы создать свой ресурс необходимо унаследоваться от одного из существующих типов и перегрузить необходимые методы. Методы должны возвращать undef в лучае успешного завершения или сообщение об ошибке.
+
+### Перегружаемые методы
+
+```perl
+sub check_params
+{
+    my ($self) = @_;
+#   Проверка входных параметров ($self->{params}, или вообще чего угодно).
+#   МОЖЕТ быть перегружен в производных объектах.
+#   NB! Проверка НАЛИЧИЯ {params}->{source} происходит в базовом конструкторе.
+    return;
+}
+```
+
+```perl
+sub create_backup_copy
+{
+#   Создание копии ресурса для отката. ДОЛЖЕН быть перегружен.
+    my ($self) = @_;
+    return 'Stub only';
+}
+```
+
+```perl
+sub delete_backup_copy
+{
+#   Удаление копии ресурса для отката. ДОЛЖЕН быть перегружен.
+    my ($self) = @_;
+    return 'Stub only';
+}
+```
+
+```perl
+sub create_work_copy
+{
+#   Создание рабочей копии ресурса для модификации. ДОЛЖЕН быть перегружен.
+    my ($self) = @_;
+    return 'Stub only';
+}
+```
+
+```perl
+sub delete_work_copy
+{
+#   Удаление рабочей копии ресура. ДОЛЖЕН быть перегружен в.
+    my ($self) = @_;
+    return 'Stub only';
+}
+```
+
+```perl
+sub commit
+{
+#   Замена ресурса на рабочую копию. ДОЛЖЕН быть перегружен.
+    my ($self) = @_;
+    return 'Stub only';
+}
+```
+
+```perl
+sub rollback
+{
+#   Замена ресурса на резервную копию. ДОЛЖЕН быть перегружен.
+    my ($self) = @_;
+    return 'Stub only';
+}
+```
