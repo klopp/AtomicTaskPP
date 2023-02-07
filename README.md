@@ -1,6 +1,7 @@
 # Реализация атомарной обработки данных
 
-* [Базовый класс](#AtomicTaskPP)
+* [Базовый класс](#базовый-класс)
+* [Блокировка](#блокировка)
 * [Создание атомарной задачи](#создание-атомарной-задачи)
 * [Ресурсы](#ресурсы)
     * [Atomic::Resource::Data](#atomicresourcedata)
@@ -11,15 +12,8 @@
     * [Atomic::Resource::MemFile](#atomicresourcememfile)
     * [Atomic::Resource::XmlFile](#atomicresourcexmlfile)
     * [Atomic::Resource::Imager](#atomicresourceimager)
-* [Блокировка](#блокировка)
- 	* [Mutex::GlobalLock]
- 	* [Mutex::LockSocket]
- 	* [Mutex::IOLambda]
- 	* [Mutex::LinuxFutex]
 * [Создание ресурса](#создание-ресурса)
     * [Перегружаемые методы](#перегружаемые-методы)
-
-<a name="Atomic::Task"></a>
 
 ## Базовый класс 
 
@@ -38,16 +32,7 @@
         #       id          => SCALAR, # ID задачи, при отсутствии будет сгенерирован
         #       quiet       => bool,   # выводить предупреждения или нет
         #       mutex       => OBJECT, # должен уметь ->lock() и ->unlock()
-        #                      хорошие кандидаты:
-        #                      * ! Mutex :: https://metacpan.org/pod/Mutex
-        #                      * ! MCE::Mutex :: https://metacpan.org/pod/MCE::Mutex
-        #                      * ! JIP::LockFile :: https://metacpan.org/pod/JIP::LockFile
-        #                      * ! JIP::LockSocket :: https://metacpan.org/pod/JIP::LockSocket
-        #                      * ~~~
-        #                      * Global::MutexLock
-        #                      * ! Lock::Socket
-        #                      * ? IO::Lambda::Mutex
-        #                      * Linux::Futex
+        @                              # см. раздел "Блокировка"
         #       commit_lock => bool,   # блокировать всё исполнение или только коммит
         #   }
         # ...
@@ -60,6 +45,25 @@
 * вызывается метод `execute()` (должен быть перегружен в дочернем объекте)
 * в случае успешного его завершения замещает исходные ресурсы модифицированными копиями (`commit`)
 * при ошибках замещения возвращает изменённые ресурсы на место (`rollback`)
+
+## Блокировка
+
+Требования к параметру  $params->{mutex} в конструкторе задачи:
+* наличие методов `lock()` и `unlock()`
+* метод `lock()` должен возвращать `undef` при отсутствии ошибок, иначе - сообщение об ошибке
+
+Для использования в объектах-задачах созданы обёртки над стандартными модулями, реализующие эти пункты:
+
+| Atomic::Mutex | CPAN |
+| :------ | :------ |
+| [Atomic::Mutex::Mutex](Atomic/Mutex/Mutex.pm) | [Mutex](https://metacpan.org/pod/Mutex) |
+| [Atomic::Mutex::MceMutex](Atomic/Mutex/MceMutex.pm) | [MCE::Mutex](https://metacpan.org/pod/MCE::Mutex) |
+| [Atomic::Mutex::JipLockFile](Atomic/Mutex/JipLockFile.pm) | [JIP::LockFile](https://metacpan.org/pod/JIP::LockFile) |
+| [Atomic::Mutex::JipLockSocket](Atomic/Mutex/JipLockSocket.pm) | [JIP::LockSocket](https://metacpan.org/pod/JIP::LockSocket) |
+| [Atomic::Mutex::LockSocket](Atomic/Mutex/LockSocket.pm) | [Lock::Socket](https://metacpan.org/pod/Lock::Socket) |
+| [Atomic::Mutex::GlobalLock](Atomic/Mutex/GlobalLock.pm) | [Global::MutexLock](https://metacpan.org/pod/Global::MutexLock) |
+| [Atomic::Mutex::LinuxFutex](Atomic/Mutex/LinuxFutex.pm) | [Linux::Futex](https://metacpan.org/pod/Linux::Futex) |
+| [Atomic::Mutex::IoLambda](Atomic/Mutex/IoLambda.pm) | [IO::Lambda::Mutex](https://metacpan.org/pod/IO::Lambda::Mutex) |
 
 ## Создание атомарной задачи
 
@@ -94,11 +98,9 @@
                 return;
     }
 
-    use Mutex;
-    my $task = ATask->new( [$xml_file], { mutex => Mutex->new, quiet => 1 } );
+    use Atomic::Mutex::Mutex;
+    my $task = ATask->new( [$xml_file], { mutex => Atomic::Mutex::Mutex->new, quiet => 1 } );
 ```
-
-<a name="Resources"></a>
 
 ## Ресурсы
 
@@ -146,8 +148,6 @@
 
 `Atomic::Task::wget()` возвращает копию исходной структуры данных.
 
-<a name="Resource_JSON"></a>
-
 ### [Atomic::Resource::JSON](Atomic/Resource/JSON.pm)
 
 Скаляр с JSON. Дополнительно могут быть указаны методы для управления парсером, см. 
@@ -163,8 +163,6 @@
 
 <a name="Resource_BSON"></a>
 
-### [Atomic::Resource::BSON](Atomic/Resource/BSON.pm)
-
 Скаляр с BSON. Дополнительно могут быть указаны флаги для управления парсером, см. 
 [BSON#ATTRIBUTES](https://metacpan.org/pod/BSON#ATTRIBUTES).
 
@@ -175,8 +173,6 @@
 ```
 
 `Atomic::Task::wget()` возвращает хэш с результатами разбора BSON.
-
-<a name="Resource_XML"></a>
 
 ### [Atomic::Resource::XML](Atomic/Resource/XML.pm)
 
@@ -191,8 +187,6 @@
 
 `Atomic::Task::wget()` возвращает хэш с результатами разбора XML.
 
-<a name="Resource_File"></a>
-
 ### [Atomic::Resource::File](Atomic/Resource/File.pm)
 
 Произвольный файл. В конструкторе только один обязательный параметр: имя файла.
@@ -204,13 +198,9 @@
 
 `Atomic::Task::wget()` возвращает объект [Path::Tiny](https://metacpan.org/pod/Path::Tiny).
 
-<a name="Resource_MemFile"></a>
-
 ### [Atomic::Resource::MemFile](Atomic/Resource/MemFile.pm)
 
 То же самое, но `Atomic::Task::wget()` возвращает буфер в памяти с содержимым исходного файла.
-
-<a name="Resource_XmlFile"></a>
 
 ### [Atomic::Resource::XmlFile](Atomic/Resource/XmlFile.pm)
 
@@ -220,8 +210,6 @@
     use Atomic::Resource::XmlFile;
     my $r_xmlfile = Atomic::Resource::XmlFile->new( { source => './data/hello.xml', xml => { keep_root => 1 } } );
 ```
-
-<a name="Resource_Imager"></a>
 
 ### [Atomic::Resource::Imager](Atomic/Resource/Imager.pm)
 
@@ -233,8 +221,6 @@
 ```
 
 `Atomic::Task::wget()` возвращает объект [Imager](https://metacpan.org/pod/Imager).
-
-<a name="Resource_Create"></a>
 
 ## Создание ресурса
 
