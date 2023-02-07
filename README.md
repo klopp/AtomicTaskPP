@@ -3,7 +3,7 @@
 * [Базовый класс](#AtomicTaskPP)
 * [Создание атомарной задачи](#создание-атомарной-задачи)
 * [Ресурсы](#Resources)
-    * [Resource::Data](#resource::data)
+    * [Resource::Data](#resource-data)
     * [Resource::JSON](#Resource_JSON)
     * [Resource::BSON](#Resource_BSON)
     * [Resource::XML](#Resource_XML)
