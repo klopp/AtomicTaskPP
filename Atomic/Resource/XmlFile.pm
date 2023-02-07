@@ -1,4 +1,4 @@
-package Resource::XML;
+package Atomic::Resource::XmlFile;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
@@ -6,26 +6,27 @@ use Modern::Perl;
 use Try::Tiny;
 use XML::Hash::XS;
 
-use lib q{..};
-use Resource::Data;
-use base qw/Resource::Data/;
+use Atomic::Resource::MemFile;
+use base qw/Atomic::Resource::MemFile/;
 
 our $VERSION = 'v1.0';
+
 # ------------------------------------------------------------------------------
 sub new
 {
 
 =for comment
     В {params} ДОЛЖНО быть:
-        {source} ссылка на скаляр с JSON
+        {source} имя исходного файла
     В {params} МОЖЕТ быть:
-        {quiet} не выводить предупреждения
+        {quiet}    не выводить предупреждения
+        {encoding} кодировка файла
         {id}
-        {xml}   флаги XML::Hash::XS
+        {xml}      флаги XML::Hash::XS
     Структура после полной инициализации:
         {id}
         {params}
-        {modified} 
+        {modified}
         {work}      рабочие данные
         {backup}    копия исходных данных
 =cut    
@@ -42,7 +43,6 @@ sub new
 sub create_work_copy
 {
     my ($self) = @_;
-
     my $error = $self->SUPER::create_work_copy;
     $error and return $error;
 
@@ -50,7 +50,7 @@ sub create_work_copy
         $self->{work} = xml2hash( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        $error = sprintf 'XML :: %s', $_;
+        $error = sprintf 'XmlFile :: %s', $_;
     };
     return $error;
 }
@@ -65,7 +65,7 @@ sub commit
         $self->{work} and $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        $error = sprintf 'XML :: %s', $_;
+        $error = sprintf 'XmlFile :: %s', $_;
     };
     return $error ? $error : $self->SUPER::commit;
 }

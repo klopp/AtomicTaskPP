@@ -1,18 +1,15 @@
-package Resource::JSON;
+package Atomic::Resource::XML;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
-use Carp qw/confess cluck/;
-use JSON::XS;
 use Try::Tiny;
+use XML::Hash::XS;
 
-use lib q{..};
-use Resource::Data;
-use base qw/Resource::Data/;
+use Atomic::Resource::Data;
+use base qw/Atomic::Resource::Data/;
 
 our $VERSION = 'v1.0';
-
 # ------------------------------------------------------------------------------
 sub new
 {
@@ -23,7 +20,7 @@ sub new
     В {params} МОЖЕТ быть:
         {quiet} не выводить предупреждения
         {id}
-        {json}  список методов для инициализации JSON::XS в формате { метод=>зачение, ...}
+        {xml}   флаги XML::Hash::XS
     Структура после полной инициализации:
         {id}
         {params}
@@ -35,21 +32,8 @@ sub new
     my ( $class, $params ) = @_;
     my $self = $class->SUPER::new($params);
 
-    $self->{json} = JSON::XS->new;
-    try {
-        while ( my ( $method, $value ) = each %{ $self->{params}->{json} } ) {
-            if ( $self->{json}->can($method) ) {
-                $self->{json}->$method($value);
-            }
-            else {
-                $params->{quiet}
-                    or cluck sprintf 'JSON :: %s() is not defined in JSON!', $method;
-            }
-        }
-    }
-    catch {
-        confess sprintf 'JSON :: %s', $_;
-    };
+    # output in SCALAR only:
+    delete $self->{params}->{xml}->{output};
     return $self;
 }
 
@@ -57,14 +41,15 @@ sub new
 sub create_work_copy
 {
     my ($self) = @_;
+
     my $error = $self->SUPER::create_work_copy;
     $error and return $error;
 
     try {
-        $self->{work} = $self->{json}->decode( $self->{work} );
+        $self->{work} = xml2hash( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        $error = sprintf 'JSON :: %s', $_;
+        $error = sprintf 'XML :: %s', $_;
     };
     return $error;
 }
@@ -76,10 +61,10 @@ sub commit
 
     my $error;
     try {
-        $self->{work} and $self->{work} = $self->{json}->encode( $self->{work} );
+        $self->{work} and $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );
     }
     catch {
-        $error = sprintf 'JSON :: %s', $_;
+        $error = sprintf 'XML :: %s', $_;
     };
     return $error ? $error : $self->SUPER::commit;
 }

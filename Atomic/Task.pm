@@ -1,4 +1,4 @@
-package AtomicTaskPP;
+package Atomic::Task;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
@@ -6,8 +6,8 @@ use Modern::Perl;
 use Carp qw/cluck confess/;
 use Time::HiRes qw/gettimeofday/;
 
-use lib q{.};
-use Resource::Base;
+use lib q{..};
+use Atomic::Resource::Base;
 
 our $VERSION = 'v1.0';
 our %TASKS;

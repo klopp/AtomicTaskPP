@@ -1,4 +1,4 @@
-package Resource::Imager;
+package Atomic::Resource::Imager;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
@@ -6,9 +6,8 @@ use Modern::Perl;
 use Imager;
 use Try::Tiny;
 
-use lib q{..};
-use Resource::Base;
-use base qw/Resource::Base/;
+use Atomic::Resource::Base;
+use base qw/Atomic::Resource::Base/;
 
 our $VERSION = 'v1.0';
 

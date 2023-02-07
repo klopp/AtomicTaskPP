@@ -1,14 +1,14 @@
-package Resource::XmlFile;
+package Atomic::Resource::JSON;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
 
+use Carp qw/confess cluck/;
+use JSON::XS;
 use Try::Tiny;
-use XML::Hash::XS;
 
-use lib q{..};
-use Resource::MemFile;
-use base qw/Resource::MemFile/;
+use Atomic::Resource::Data;
+use base qw/Atomic::Resource::Data/;
 
 our $VERSION = 'v1.0';
 
@@ -18,16 +18,15 @@ sub new
 
 =for comment
     В {params} ДОЛЖНО быть:
-        {source} имя исходного файла
+        {source} ссылка на скаляр с JSON
     В {params} МОЖЕТ быть:
-        {quiet}    не выводить предупреждения
-        {encoding} кодировка файла
+        {quiet} не выводить предупреждения
         {id}
-        {xml}      флаги XML::Hash::XS
+        {json}  список методов для инициализации JSON::XS в формате { метод=>зачение, ...}
     Структура после полной инициализации:
         {id}
         {params}
-        {modified}
+        {modified} 
         {work}      рабочие данные
         {backup}    копия исходных данных
 =cut    
@@ -35,8 +34,21 @@ sub new
     my ( $class, $params ) = @_;
     my $self = $class->SUPER::new($params);
 
-    # output in SCALAR only:
-    delete $self->{params}->{xml}->{output};
+    $self->{json} = JSON::XS->new;
+    try {
+        while ( my ( $method, $value ) = each %{ $self->{params}->{json} } ) {
+            if ( $self->{json}->can($method) ) {
+                $self->{json}->$method($value);
+            }
+            else {
+                $params->{quiet}
+                    or cluck sprintf 'JSON :: %s() is not defined in JSON!', $method;
+            }
+        }
+    }
+    catch {
+        confess sprintf 'JSON :: %s', $_;
+    };
     return $self;
 }
 
@@ -48,10 +60,10 @@ sub create_work_copy
     $error and return $error;
 
     try {
-        $self->{work} = xml2hash( $self->{work}, %{ $self->{params}->{xml} } );
+        $self->{work} = $self->{json}->decode( $self->{work} );
     }
     catch {
-        $error = sprintf 'XmlFile :: %s', $_;
+        $error = sprintf 'JSON :: %s', $_;
     };
     return $error;
 }
@@ -63,10 +75,10 @@ sub commit
 
     my $error;
     try {
-        $self->{work} and $self->{work} = hash2xml( $self->{work}, %{ $self->{params}->{xml} } );
+        $self->{work} and $self->{work} = $self->{json}->encode( $self->{work} );
     }
     catch {
-        $error = sprintf 'XmlFile :: %s', $_;
+        $error = sprintf 'JSON :: %s', $_;
     };
     return $error ? $error : $self->SUPER::commit;
 }

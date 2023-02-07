@@ -1,4 +1,4 @@
-package Resource::BSON;
+package Atomic::Resource::BSON;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
@@ -6,9 +6,8 @@ use Modern::Perl;
 use BSON;
 use Try::Tiny;
 
-use lib q{..};
-use Resource::Data;
-use base qw/Resource::Data/;
+use Atomic::Resource::Data;
+use base qw/Atomic::Resource::Data/;
 
 our $VERSION = 'v1.0';
 

@@ -1,16 +1,13 @@
-package Resource::MemFile;
+package Atomic::Resource::File;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
-use utf8::all;
-use open qw/:std :utf8/;
 
 use Path::Tiny;
 use Try::Tiny;
 
-use lib q{..};
-use Resource::Base;
-use base qw/Resource::Base/;
+use Atomic::Resource::Base;
+use base qw/Atomic::Resource::Base/;
 
 our $VERSION = 'v1.0';
 
@@ -22,23 +19,22 @@ sub new
     В {params} ДОЛЖНО быть:
         {source} имя исходного файла
     В {params} МОЖЕТ быть:
-        {quiet}    не выводить предупреждения
+        {quiet}   не выводить предупреждения
+        {tempdir}
         {id}
-        {encoding} кодировка 
     Структура после полной инициализации:
         {id}
         {params}
-        {modified} 
-        {work}      буфер с рабочим файлом
-        {backup}    буфер с копией исходного файла
+        {modified}
+        {work}     рабочий файл (Path::Tiny)
+        {bakup}    резервная копия исходного файла (Path::Tiny)
 =cut    
 
     my ( $class, $params ) = @_;
-    my $self     = $class->SUPER::new($params);
-    my $encoding = ':raw';
-    $params->{encoding} and $encoding .= sprintf ':encoding(%s)', $params->{encoding};
-    $self->{_filemode} = { binmode => $encoding };
-
+    my $self = $class->SUPER::new($params);
+    $self->{tempdir} = $params->{tempdir};
+    $self->{tempdir}    or $self->{tempdir} = $ENV{HOME} . '/tmp';
+    -d $self->{tempdir} or $self->{tempdir} = q{.};
     return $self;
 }
 
@@ -49,10 +45,11 @@ sub create_backup_copy
 
     my $error;
     try {
-        $self->{backup} = path( $self->{params}->{source} )->slurp( $self->{_filemode} );
+        $self->{backup} = Path::Tiny->tempfile( DIR => $self->{tempdir} );
+        path( $self->{params}->{source} )->copy( $self->{backup} );
     }
     catch {
-        $error = sprintf 'MemFile :: %s', $_;
+        $error = sprintf 'File :: %s', $_;
     };
     return $error;
 }
@@ -61,6 +58,7 @@ sub create_backup_copy
 sub delete_backup_copy
 {
     my ($self) = @_;
+    $self->{backup} and path( $self->{backup} )->remove;
     delete $self->{backup};
     return;
 }
@@ -72,10 +70,11 @@ sub create_work_copy
 
     my $error;
     try {
-        $self->{work} = path( $self->{params}->{source} )->slurp( $self->{_filemode} );
+        $self->{work} = Path::Tiny->tempfile( DIR => $self->{tempdir} );
+        path( $self->{params}->{source} )->copy( $self->{work} );
     }
     catch {
-        $error = sprintf 'MemFile :: %s', $_;
+        $error = sprintf 'File :: %s', $_;
     };
     return $error;
 }
@@ -84,6 +83,7 @@ sub create_work_copy
 sub delete_work_copy
 {
     my ($self) = @_;
+    $self->{work} and path( $self->{work} )->remove;
     delete $self->{work};
     return;
 }
@@ -95,11 +95,11 @@ sub commit
 
     my $error;
     try {
-        $self->{work} and path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{work} );
+        $self->{work} and $self->{work}->move( $self->{params}->{source} );
     }
     catch {
-        $error = sprintf 'MemFile :: "%s" (%s)', $self->{params}->{source}, $_
-    };
+        $error = sprintf 'File :: "%s": %s', $self->{params}->{source}, $_;
+    }
     return $error;
 }
 
@@ -110,11 +110,11 @@ sub rollback
 
     my $error;
     try {
-        $self->{backup} and path( $self->{params}->{source} )->spew( $self->{_filemode}, $self->{backup} );
+        $self->{backup} and $self->{backup}->move( $self->{params}->{source} );
     }
     catch {
-        $error = sprintf 'MemFile :: "%s" (%s)', $self->{params}->{source}, $_;
-    };
+        $error = sprintf 'File :: "%s": %s', $self->{params}->{source}, $_;
+    }
     return $error;
 }
 

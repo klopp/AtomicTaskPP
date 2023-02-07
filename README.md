@@ -3,37 +3,51 @@
 * [Базовый класс](#AtomicTaskPP)
 * [Создание атомарной задачи](#создание-атомарной-задачи)
 * [Ресурсы](#ресурсы)
-    * [Resource::Data](#resourcedata)
-    * [Resource::JSON](#resourcejson)
-    * [Resource::BSON](#resourcebson)
-    * [Resource::XML](#resourcexml)
-    * [Resource::File](#resourcefile)
-    * [Resource::MemFile](#resourcememfile)
-    * [Resource::XmlFile](#resourcexmlfile)
-    * [Resource::Imager](#resourceimager)
+    * [Atomic::Resource::Data](#atomicresourcedata)
+    * [Atomic::Resource::JSON](#atomicresourcejson)
+    * [Atomic::Resource::BSON](#atomicresourcebson)
+    * [Atomic::Resource::XML](#atomicresourcexml)
+    * [Atomic::Resource::File](#atomicresourcefile)
+    * [Atomic::Resource::MemFile](#atomicresourcememfile)
+    * [Atomic::Resource::XmlFile](#atomicresourcexmlfile)
+    * [Atomic::Resource::Imager](#atomicresourceimager)
+* [Блокировка](#блокировка)
+ 	* [Mutex::GlobalLock]
+ 	* [Mutex::LockSocket]
+ 	* [Mutex::IOLambda]
+ 	* [Mutex::LinuxFutex]
 * [Создание ресурса](#создание-ресурса)
     * [Перегружаемые методы](#перегружаемые-методы)
 
-<a name="AtomicTaskPP"></a>
+<a name="Atomic::Task"></a>
 
 ## Базовый класс 
 
+[Atomic::Task](Atomic/Task.pm)
 
-[AtomicTaskPP](AtomicTaskPP.pm)
-
-Принимает массив модифицируемых ресурсов (`Resource::*`) и дополнительные параметры:
+Принимает массив модифицируемых ресурсов (`Atomic::Resource::*`) и дополнительные параметры:
 
 ```perl
     sub new 
     {
         my ( $class, $resources, $params ) = @_;
         #   $resources => [ 
-        #       Resource::*, ... 
+        #       Atomic::Resource::*, ... 
         #   ]
         #   $params = {
         #       id          => SCALAR, # ID задачи, при отсутствии будет сгенерирован
         #       quiet       => bool,   # выводить предупреждения или нет
         #       mutex       => OBJECT, # должен уметь ->lock() и ->unlock()
+        #                      хорошие кандидаты:
+        #                      * ! Mutex :: https://metacpan.org/pod/Mutex
+        #                      * ! MCE::Mutex :: https://metacpan.org/pod/MCE::Mutex
+        #                      * ! JIP::LockFile :: https://metacpan.org/pod/JIP::LockFile
+        #                      * ! JIP::LockSocket :: https://metacpan.org/pod/JIP::LockSocket
+        #                      * ~~~
+        #                      * Global::MutexLock
+        #                      * ! Lock::Socket
+        #                      * ? IO::Lambda::Mutex
+        #                      * Linux::Futex
         #       commit_lock => bool,   # блокировать всё исполнение или только коммит
         #   }
         # ...
@@ -49,12 +63,12 @@
 
 ## Создание атомарной задачи
 
-Необхдимо унаследоваться от [AtomicTaskPP](AtomicTaskPP.pm) и перегрузить метод `execute()`:
+Необхдимо унаследоваться от [Atomic::Task](Atomic/Task.pm) и перегрузить метод `execute()`:
 
 ```perl
     package ATask;
-    use AtomicTaskPP;
-    use base qw/AtomicTaskPP/;
+    use Atomic::Task;
+    use base qw/Atomic::Task/;
 
     sub execute
     {
@@ -88,7 +102,7 @@
 
 ## Ресурсы
 
-Наследуются от абстрактного класса [Resource::Base](Resource/Base.pm). 
+Наследуются от абстрактного класса [Atomic::Resource::Base](Atomic/Resource/Base.pm). 
 Конструктор принимает ссылку на хэш с параметрами:
 
 ```perl
@@ -108,117 +122,117 @@
 В случае ошибок конструктор генерирует исключение. 
 
 ```perl
-    use Resource::XmlFile;
+    use Atomic::Resource::XmlFile;
     use Try::Tiny;
     my $xml_file;
     try {
-        $xml_file = Resource::XmlFile->new( { source => '../data/test.xml' } );
+        $xml_file = Atomic::Resource::XmlFile->new( { source => '../data/test.xml' } );
     }
     catch {
         say sprintf 'Error: %s', $_;
     };
 ```
 
-### [Resource::Data](Resource/Data.pm)
+### [Atomic::Resource::Data](Atomic/Resource/Data.pm)
 
 Любая структура данных (SCALAR, HASH, ARRAY, OBJECT). В случае blessed-объекта для 
 корректного копирования в объекте должен быть (при необходимости) метод `clone()`.
 
 ```perl
-    use Resource::Data;
+    use Atomic::Resource::Data;
     my $data = { a => 1, b => 2 };
-    my $r_data = Resource::Data->new( { source => \$data } );
+    my $r_data = Atomic::Resource::Data->new( { source => \$data } );
 ```
 
-`AtomicTaskPP::wget()` возвращает копию исходной структуры данных.
+`Atomic::Task::wget()` возвращает копию исходной структуры данных.
 
 <a name="Resource_JSON"></a>
 
-### [Resource::JSON](Resource/JSON.pm)
+### [Atomic::Resource::JSON](Atomic/Resource/JSON.pm)
 
 Скаляр с JSON. Дополнительно могут быть указаны методы для управления парсером, см. 
 [JSON::XS#OBJECT-ORIENTED-INTERFACE](https://metacpan.org/pod/JSON::XS#OBJECT-ORIENTED-INTERFACE).
 
 ```perl
-    use Resource::JSON;
+    use Atomic::Resource::JSON;
     my $json = '{"a":1, "b":2}';
-    my $r_json = Resource::JSON->new( { source => \$json, json => { pretty => 1 } } );
+    my $r_json = Atomic::Resource::JSON->new( { source => \$json, json => { pretty => 1 } } );
 ```
 
-`AtomicTaskPP::wget()` возвращает хэш с результатами разбора JSON.
+`Atomic::Task::wget()` возвращает хэш с результатами разбора JSON.
 
 <a name="Resource_BSON"></a>
 
-### [Resource::BSON](Resource/BSON.pm)
+### [Atomic::Resource::BSON](Atomic/Resource/BSON.pm)
 
 Скаляр с BSON. Дополнительно могут быть указаны флаги для управления парсером, см. 
 [BSON#ATTRIBUTES](https://metacpan.org/pod/BSON#ATTRIBUTES).
 
 ```perl
-    use Resource::BSON;
+    use Atomic::Resource::BSON;
     my $bson = '';
-    my $r_bson = Resource::BSON->new( { source => \$bson, bson => { prefer_numeric => 1 } } );
+    my $r_bson = Atomic::Resource::BSON->new( { source => \$bson, bson => { prefer_numeric => 1 } } );
 ```
 
-`AtomicTaskPP::wget()` возвращает хэш с результатами разбора BSON.
+`Atomic::Task::wget()` возвращает хэш с результатами разбора BSON.
 
 <a name="Resource_XML"></a>
 
-### [Resource::XML](Resource/XML.pm)
+### [Atomic::Resource::XML](Atomic/Resource/XML.pm)
 
 Скаляр с XMP. Дополнительно могут быть указаны методы для управления парсером, см. 
 [XML::Hash::XS#OPTIONS](https://metacpan.org/pod/XML::Hash::XS#OPTIONS).
 
 ```perl
-    use Resource::XML;
+    use Atomic::Resource::XML;
     my $xml = '<root a="1" b="2">text</root>';
-    my $r_xml = Resource::XML->new( { source => \$xml, xml => { indent => 2 } } );
+    my $r_xml = Atomic::Resource::XML->new( { source => \$xml, xml => { indent => 2 } } );
 ```
 
-`AtomicTaskPP::wget()` возвращает хэш с результатами разбора XML.
+`Atomic::Task::wget()` возвращает хэш с результатами разбора XML.
 
 <a name="Resource_File"></a>
 
-### [Resource::File](Resource/File.pm)
+### [Atomic::Resource::File](Atomic/Resource/File.pm)
 
 Произвольный файл. В конструкторе только один обязательный параметр: имя файла.
 
 ```perl
-    use Resource::File;
-    my $r_file = Resource::File->new( { source => './data/hello.txt' } );
+    use Atomic::Resource::File;
+    my $r_file = Atomic::Resource::File->new( { source => './data/hello.txt' } );
 ```
 
-`AtomicTaskPP::wget()` возвращает объект [Path::Tiny](https://metacpan.org/pod/Path::Tiny).
+`Atomic::Task::wget()` возвращает объект [Path::Tiny](https://metacpan.org/pod/Path::Tiny).
 
 <a name="Resource_MemFile"></a>
 
-### [Resource::MemFile](Resource/MemFile.pm)
+### [Atomic::Resource::MemFile](Atomic/Resource/MemFile.pm)
 
-То же самое, но `AtomicTaskPP::wget()` возвращает буфер в памяти с содержимым исходного файла.
+То же самое, но `Atomic::Task::wget()` возвращает буфер в памяти с содержимым исходного файла.
 
 <a name="Resource_XmlFile"></a>
 
-### [Resource::XmlFile](Resource/XmlFile.pm)
+### [Atomic::Resource::XmlFile](Atomic/Resource/XmlFile.pm)
 
-Аналогично `Resource::XML`, но на входе имя файла:
+Аналогично `Atomic::Resource::XML`, но на входе имя файла:
 
 ```perl
-    use Resource::XmlFile;
-    my $r_xmlfile = Resource::XmlFile->new( { source => './data/hello.xml', xml => { keep_root => 1 } } );
+    use Atomic::Resource::XmlFile;
+    my $r_xmlfile = Atomic::Resource::XmlFile->new( { source => './data/hello.xml', xml => { keep_root => 1 } } );
 ```
 
 <a name="Resource_Imager"></a>
 
-### [Resource::Imager](Resource/Imager.pm)
+### [Atomic::Resource::Imager](Atomic/Resource/Imager.pm)
 
 Картинка. Поддерживаются форматы `raw, sgi, bmp, pnm, ico, jpeg, tga, png, gif, tiff`.
 
 ```perl
-    use Resource::Imager;
-    my $r_img = Resource::Imager->new( { source => './data/hello.jpg' } );
+    use Atomic::Resource::Imager;
+    my $r_img = Atomic::Resource::Imager->new( { source => './data/hello.jpg' } );
 ```
 
-`AtomicTaskPP::wget()` возвращает объект [Imager](https://metacpan.org/pod/Imager).
+`Atomic::Task::wget()` возвращает объект [Imager](https://metacpan.org/pod/Imager).
 
 <a name="Resource_Create"></a>
 

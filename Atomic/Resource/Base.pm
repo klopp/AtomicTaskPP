@@ -1,4 +1,4 @@
-package Resource::Base;
+package Atomic::Resource::Base;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;

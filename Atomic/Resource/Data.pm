@@ -1,4 +1,4 @@
-package Resource::Data;
+package Atomic::Resource::Data;
 
 # ------------------------------------------------------------------------------
 use Modern::Perl;
@@ -7,9 +7,8 @@ use Carp qw/cluck/;
 use Clone qw/clone/;
 use Scalar::Util qw/blessed/;
 
-use lib q{..};
-use Resource::Base;
-use base qw/Resource::Base/;
+use Atomic::Resource::Base;
+use base qw/Atomic::Resource::Base/;
 
 our $VERSION = 'v1.0';
 
