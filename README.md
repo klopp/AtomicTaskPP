@@ -1,7 +1,7 @@
 # Реализация атомарной обработки данных
 
 * [Базовый класс](#AtomicTaskPP)
-* [Создание атомарной задачи](#AtomicTaskPP_Create)
+* [Создание атомарной задачи](#создание-атомарной-задачи)
 * [Ресурсы](#Resources)
     * [Resource::Data](#Resource_Data)
     * [Resource::JSON](#Resource_JSON)
@@ -11,7 +11,7 @@
     * [Resource::MemFile](#Resource_MemFile)
     * [Resource::XmlFile](#Resource_XmlFile)
     * [Resource::Imager](#Resource_Imager)
-* [Создание своего ресурса](#Resource_Create)
+* [Создание ресурса](#Resource_Create)
 
 <a name="AtomicTaskPP"></a>
 
@@ -106,11 +106,18 @@
     }
 ```
 
-Например:
+В случае ошибок конструктор генерирует исключение. 
 
 ```perl
     use Resource::XmlFile;
-    my $xml_file = Resource::XmlFile->new( { source => '../data/test.xml' } );
+    use Try::Tiny;
+    my $xml_file;
+    try {
+        $xml_file = Resource::XmlFile->new( { source => '../data/test.xml' } );
+    }
+    catch {
+        say sprintf 'Error: %s', $_;
+    };
 ```
 
 <a name="Resource_Data"></a>
@@ -218,5 +225,5 @@
 
 <a name="Resource_Create"></a>
 
-## Создание своего ресурса
+## Создание ресурса
 
