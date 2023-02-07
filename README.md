@@ -3,7 +3,7 @@
 * [Базовый класс](#AtomicTaskPP)
 * [Создание атомарной задачи](#создание-атомарной-задачи)
 * [Ресурсы](#Resources)
-    * [Resource::Data](#Resource_Data)
+    * [Resource::Data](#Resource::Data)
     * [Resource::JSON](#Resource_JSON)
     * [Resource::BSON](#Resource_BSON)
     * [Resource::XML](#Resource_XML)
@@ -45,8 +45,6 @@
 * вызывается метод `execute()` (должен быть перегружен в дочернем объекте)
 * в случае успешного его завершения замещает исходные ресурсы модифицированными копиями (`commit`)
 * при ошибках замещения возвращает изменённые ресурсы на место (`rollback`)
-
-<a name="AtomicTaskPP_Create"></a>
 
 ## Создание атомарной задачи
 
@@ -119,8 +117,6 @@
         say sprintf 'Error: %s', $_;
     };
 ```
-
-<a name="Resource_Data"></a>
 
 ### [Resource::Data](Resource/Data.pm)
 
