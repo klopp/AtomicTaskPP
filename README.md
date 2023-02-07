@@ -2,16 +2,16 @@
 
 * [Базовый класс](#AtomicTaskPP)
 * [Создание атомарной задачи](#создание-атомарной-задачи)
-* [Ресурсы](#Resources)
+* [Ресурсы](#ресурсы)
     * [Resource::Data](#resourcedata)
-    * [Resource::JSON](#Resource_JSON)
-    * [Resource::BSON](#Resource_BSON)
-    * [Resource::XML](#Resource_XML)
-    * [Resource::File](#Resource_File)
-    * [Resource::MemFile](#Resource_MemFile)
-    * [Resource::XmlFile](#Resource_XmlFile)
-    * [Resource::Imager](#Resource_Imager)
-* [Создание ресурса](#Resource_Create)
+    * [Resource::JSON](#resourcejson)
+    * [Resource::BSON](#resourcebson)
+    * [Resource::XML](#resourcexml)
+    * [Resource::File](#resourcefile)
+    * [Resource::MemFile](#resourcememfile)
+    * [Resource::XmlFile](#resourcexmlfile)
+    * [Resource::Imager](#resourceimager)
+* [Создание ресурса](#создание-ресурса)
 
 <a name="AtomicTaskPP"></a>
 
