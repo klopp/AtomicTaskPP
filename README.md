@@ -118,7 +118,7 @@
     };
 ```
 
-### Resource::Data
+### [Resource::Data](Resource/Data.pm)
 
 [Resource::Data](Resource/Data.pm)
 
