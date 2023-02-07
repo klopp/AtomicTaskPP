@@ -147,6 +147,11 @@ sub run
     my ($self) = @_;
 
     my $error;
+
+    if ( $self->{params}->{mutex} && !$self->{params}->{commit_lock} ) {
+        $error = $self->{params}->{mutex}->lock;
+        $error and return confess sprintf "Error locking task: %s\n", _trim($error);
+    }
     for ( 0 .. @{ $self->{resources} } - 1 ) {
         my $rs = $self->{resources}->[$_];
 
@@ -165,7 +170,6 @@ sub run
             return confess sprintf "Error creating work copy: %s\n", _trim($error);
         }
     }
-    $self->{params}->{mutex}->lock if $self->{params}->{mutex} && !$self->{params}->{commit_lock};
 
 =for comment
     Модифицируем реурсы
@@ -187,7 +191,13 @@ sub run
     Меняем оригинальные ресурсы на модифицированные
 =cut
 
-    $self->{params}->{mutex}->lock if $self->{params}->{mutex} && $self->{params}->{commit_lock};
+    if ( $self->{params}->{mutex} && $self->{params}->{commit_lock} ) {
+        $error = $self->{params}->{mutex}->lock;
+        if ($error) {
+            $self->_delete_works;
+            return confess sprintf "Error locking commit: %s\n", _trim($error);
+        }
+    }
     for ( 0 .. @{ $self->{resources} } - 1 ) {
         my $rs = $self->{resources}->[$_];
         if ( $rs->modified ) {
