@@ -81,7 +81,7 @@ sub modified
         ->modified(0);
 =cut
 
-    if( !@_ || $_[0] ) {
+    if ( !@_ || $_[0] ) {
         $self->{modified} = 1;
     }
     else {
@@ -93,7 +93,7 @@ sub modified
 # ------------------------------------------------------------------------------
 sub is_modified
 {
-    my $self = shift;
+    my ($self) = @_;
     return $self->{modified};
 }
 
