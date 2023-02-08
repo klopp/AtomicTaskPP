@@ -117,6 +117,8 @@ sub check_params
 
 ```
 
+Примеры можно посмотреть в каталоге [examples](./examples/).
+
 ## Ресурсы
 
 Наследуются от абстрактного класса [Atomic::Resource::Base](Atomic/Resource/Base.pm). Конструктор принимает ссылку на хэш с параметрами:
