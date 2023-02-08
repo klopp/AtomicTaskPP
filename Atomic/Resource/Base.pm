@@ -70,8 +70,30 @@ sub id
 # ------------------------------------------------------------------------------
 sub modified
 {
-    my ( $self, $value ) = @_;
-    $value and $self->{modified} = $value;
+    my $self = shift;
+
+=for comment
+    * выставить {modified}:
+        ->modified;
+        ->modified(1);
+    * сбросить {modified}:
+        ->modified(undef);
+        ->modified(0);
+=cut
+
+    if( !@_ || $_[0] ) {
+        $self->{modified} = 1;
+    }
+    else {
+        delete $self->{modified};
+    }
+    return $self->{modified};
+}
+
+# ------------------------------------------------------------------------------
+sub is_modified
+{
+    my $self = shift;
     return $self->{modified};
 }
 

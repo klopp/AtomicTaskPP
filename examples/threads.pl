@@ -51,7 +51,7 @@ sub execute
     my ($self) = @_;
     for ( @{ $self->{resources} } ) {
         $_->{work} = sprintf "Task ID: %s, resource ID: %s", $self->id, $_->id;
-        $_->{modified} = 1;
+        $_->modified;
     }
     return;
 }

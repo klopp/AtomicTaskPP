@@ -55,10 +55,10 @@ our %TASKS;
             #   Основное (а другого и не нужно):
             #
             #       что-то делаем с данными: $data->{work}
-            #       $data->{modified} = 1; (если менялось)
+            #       $data->modified; (если менялось)
             #
             #       что-то делаем с содержимым файла в памяти: $memfile->{work}
-            #       $memfile->{modified} = 1; (если менялось)
+            #       $memfile->modified; (если менялось)
             #            
             return;
         }       
@@ -217,7 +217,7 @@ sub run
     }
     for ( 0 .. @{ $self->{resources} } - 1 ) {
         my $rs = $self->{resources}->[$_];
-        if ( $rs->modified ) {
+        if ( $rs->is_modified ) {
             $error = $rs->create_backup_copy;
             if ($error) {
                 $self->_rollback($_);
@@ -267,7 +267,7 @@ sub _rollback
     for ( 0 .. $i ) {
         my $rs = $self->{resources}->[$_];
         next unless $rs;
-        if ( $rs->modified ) {
+        if ( $rs->is_modified ) {
             $rs->rollback;
             $rs->delete_bakup_copy;
         }
@@ -281,7 +281,7 @@ sub _delete_backups
 {
     my ($self) = @_;
     for ( @{ $self->{resources} } ) {
-        $_->modified and $_->delete_backup_copy;
+        $_->is_modified and $_->delete_backup_copy;
     }
     return;
 }
