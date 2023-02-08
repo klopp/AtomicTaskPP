@@ -9,7 +9,7 @@ use Time::HiRes qw/gettimeofday/;
 use lib q{..};
 use Atomic::Resource::Base;
 
-our $VERSION = 'v1.0';
+our $VERSION = 'v2.0';
 our %TASKS;
 
 # ------------------------------------------------------------------------------
