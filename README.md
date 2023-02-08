@@ -60,7 +60,6 @@
 | [Atomic::Mutex::MceMutex](Atomic/Mutex/MceMutex.pm) | [MCE::Mutex](https://metacpan.org/pod/MCE::Mutex) |
 | [Atomic::Mutex::JipLockFile](Atomic/Mutex/JipLockFile.pm) | [JIP::LockFile](https://metacpan.org/pod/JIP::LockFile) |
 | [Atomic::Mutex::JipLockSocket](Atomic/Mutex/JipLockSocket.pm) | [JIP::LockSocket](https://metacpan.org/pod/JIP::LockSocket) |
-| [Atomic::Mutex::LockSocket](Atomic/Mutex/LockSocket.pm) | [Lock::Socket](https://metacpan.org/pod/Lock::Socket) |
 | [Atomic::Mutex::GlobalLock](Atomic/Mutex/GlobalLock.pm) | [Global::MutexLock](https://metacpan.org/pod/Global::MutexLock) |
 | [Atomic::Mutex::LinuxFutex](Atomic/Mutex/LinuxFutex.pm) | [Linux::Futex](https://metacpan.org/pod/Linux::Futex) |
 | [Atomic::Mutex::IoLambda](Atomic/Mutex/IoLambda.pm) | [IO::Lambda::Mutex](https://metacpan.org/pod/IO::Lambda::Mutex) |
